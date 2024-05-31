@@ -2,7 +2,6 @@ package com.golden.labelapp.labelapp.dao;
 
 import com.golden.labelapp.labelapp.dto.Image;
 import com.golden.labelapp.labelapp.dto.ObjectDetect;
-import com.golden.labelapp.labelapp.dto.YoloV5;
 import com.golden.labelapp.labelapp.services.ImageServices;
 
 
