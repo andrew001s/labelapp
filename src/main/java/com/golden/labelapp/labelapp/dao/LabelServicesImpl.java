@@ -50,4 +50,14 @@ public class LabelServicesImpl implements LabelServices {
         }
     }
 
+    @Override
+    public int getLabelId(String labelclass) {
+        List<Labels> existingLabels = labelsRepository.findByLabel(labelclass);
+        if (!existingLabels.isEmpty()) {
+            return existingLabels.get(0).getId();
+        } else {
+            return -1;
+        }
+    }
+
 }
