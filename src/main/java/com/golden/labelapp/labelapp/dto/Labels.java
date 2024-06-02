@@ -2,8 +2,9 @@ package com.golden.labelapp.labelapp.dto;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-
+@Entity
 @Document(collection = "labels")
 public class Labels {
     @Id
@@ -13,6 +14,11 @@ public class Labels {
 
     public Labels(int id, String label, int cant) {
         this.id = id;
+        this.label = label;
+        this.cant = cant;
+    }
+    public Labels(String label, int cant) {
+        
         this.label = label;
         this.cant = cant;
     }
