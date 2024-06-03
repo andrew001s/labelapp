@@ -17,13 +17,8 @@ public class Labels {
         this.label = label;
         this.cant = cant;
     }
-    public Labels(String label, int cant) {
-        
-        this.label = label;
-        this.cant = cant;
-    }
 
-   
+
     public int getId() {
         return id;
     }

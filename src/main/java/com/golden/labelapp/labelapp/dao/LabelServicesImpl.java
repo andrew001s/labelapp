@@ -42,8 +42,8 @@ public class LabelServicesImpl implements LabelServices {
         } else {
             
             cant = 1;
-           
-            Labels newLabel = new Labels(labelclass, cant);
+            id = labelsRepository.findAll().get(labelsRepository.findAll().size() - 1).getId() + 1;
+            Labels newLabel = new Labels(id,labelclass, cant);
             labelsRepository.save(newLabel); 
         }
     }
