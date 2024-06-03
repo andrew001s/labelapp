@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.golden.labelapp.labelapp.dao.LabelServicesImpl;
 import com.golden.labelapp.labelapp.dto.Labels;
+import com.golden.labelapp.labelapp.services.LabelServices;
 
 
 
@@ -19,7 +19,7 @@ import com.golden.labelapp.labelapp.dto.Labels;
 @RequestMapping("/label")
 public class LabelController {
     @Autowired
-    private LabelServicesImpl labelServicesImpl;
+    private LabelServices labelServicesImpl;
 
     @Transactional(readOnly = true)
     @GetMapping("/all")

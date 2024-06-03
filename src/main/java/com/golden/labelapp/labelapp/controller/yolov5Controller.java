@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.golden.labelapp.labelapp.dao.YoloV5Impl;
 import com.golden.labelapp.labelapp.dto.YoloV5;
+import com.golden.labelapp.labelapp.services.YoloV5Service;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class yolov5Controller {
 
     @Autowired
-    private YoloV5Impl yoloV5Impl;
+    private YoloV5Service yoloV5Impl;
 
     @Transactional(readOnly = true)
     @GetMapping("/all")

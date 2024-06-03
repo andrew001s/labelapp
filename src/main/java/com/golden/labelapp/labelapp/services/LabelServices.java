@@ -8,4 +8,5 @@ public interface LabelServices {
     List<Labels> getAllLabels();
     void saveLabel(String labelclass);
     int getLabelId(String labelclass);
+
 } 
