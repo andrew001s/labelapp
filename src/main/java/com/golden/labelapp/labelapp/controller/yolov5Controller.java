@@ -2,17 +2,10 @@ package com.golden.labelapp.labelapp.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.golden.labelapp.labelapp.dto.ObjectDetect;
 import com.golden.labelapp.labelapp.dto.YoloV5;
 import com.golden.labelapp.labelapp.services.YoloV5Service;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -47,7 +40,7 @@ public class yolov5Controller {
             result.append(od.getIdlabel()).append(" ");
             for (Object point : od.getPoints()) {
                 String pointString = point.toString().replace("[", "")
-                    .replace("]", "").replace(",", "");
+                        .replace("]", "").replace(",", "");
 
                 result.append(pointString).append(" ");
             }
@@ -56,7 +49,7 @@ public class yolov5Controller {
         }
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.TEXT_PLAIN);
-        String filename = name.replaceAll("\\.(jpeg|png|jpg)$", ".txt");        
+        String filename = name.replaceAll("\\.(jpeg|png|jpg)$", ".txt");
         headers.setContentDispositionFormData("attachment", filename);
         return ResponseEntity.ok().headers(headers).body(result.toString());
     }
