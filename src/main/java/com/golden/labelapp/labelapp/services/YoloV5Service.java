@@ -8,4 +8,5 @@ import com.golden.labelapp.labelapp.dto.YoloV5;
 public interface YoloV5Service {
     void saveYoloV5(String name,List<ObjectDetect> yoloV5);
     List<YoloV5> getAllYoloV5();
+    YoloV5 getYoloV5ByName(String name);
 }

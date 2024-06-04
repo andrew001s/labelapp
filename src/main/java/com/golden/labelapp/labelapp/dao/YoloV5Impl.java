@@ -28,4 +28,9 @@ public class YoloV5Impl implements YoloV5Service{
         return yoloV5Repository.findAll();
     }
 
+    @Override
+    public YoloV5 getYoloV5ByName(String name) {
+        return yoloV5Repository.findByName(name);
+    }
+
 }

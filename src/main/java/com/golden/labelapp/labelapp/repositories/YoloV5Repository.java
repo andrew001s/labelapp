@@ -10,6 +10,6 @@ import com.golden.labelapp.labelapp.dto.YoloV5;
 public interface YoloV5Repository  extends MongoRepository<YoloV5, String>{
 
     void save(List<ObjectDetect> yoloV5);
-
+    YoloV5 findByName(String name);
     
 } 

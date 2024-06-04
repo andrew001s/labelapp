@@ -14,13 +14,7 @@ public class YoloV5 {
     private String name;
     private List<ObjectDetect> objectdetect;
 
-    public Object getObjectdetect() {
-        return objectdetect;
-    }
 
-    public void setObjectdetect(List<ObjectDetect> objectdetect) {
-        this.objectdetect = objectdetect;
-    }
 
     public YoloV5(String name,List<ObjectDetect> objectdetect) {
         this.name = name;
@@ -41,6 +35,14 @@ public class YoloV5 {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<ObjectDetect> getObjectdetect() {
+        return objectdetect;
+    }
+
+    public void setObjectdetect(List<ObjectDetect> objectdetect) {
+        this.objectdetect = objectdetect;
     }
     
 
