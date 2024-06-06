@@ -7,8 +7,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document   
 public class Train extends Dataset{
 
-    public Train(String id, List<ObjectDetect> points) {
-        super(id, points);
+    public Train(String name, List<ObjectDetect> objectdetect) {
+        super(name, objectdetect);
     }
 
 }

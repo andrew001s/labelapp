@@ -7,7 +7,8 @@ import jakarta.persistence.Id;
 public class Dataset {
     @Id
     private String id;
-    private List<ObjectDetect> points;
+    private String name;
+    private List<ObjectDetect> objectdetect;
     public String getId() {
         return id;
     }
@@ -15,14 +16,20 @@ public class Dataset {
         this.id = id;
     }
     public List<ObjectDetect> getPoints() {
-        return points;
+        return objectdetect;
     }
-    public void setPoints(List<ObjectDetect> points) {
-        this.points = points;
+    public void setPoints(List<ObjectDetect> objectdetect) {
+        this.objectdetect = objectdetect;
     }
-    public Dataset(String id, List<ObjectDetect> points) {
-        this.id = id;
-        this.points = (List<ObjectDetect>) points;
+    public Dataset(String name, List<ObjectDetect> objectdetect) {
+        this.name = name;
+        this.objectdetect = (List<ObjectDetect>) objectdetect;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
     } 
 
     

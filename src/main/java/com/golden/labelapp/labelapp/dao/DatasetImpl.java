@@ -8,10 +8,15 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.golden.labelapp.labelapp.dto.DatasetRequest;
 import com.golden.labelapp.labelapp.dto.ObjectDetect;
+import com.golden.labelapp.labelapp.dto.Test;
 import com.golden.labelapp.labelapp.dto.Train;
+import com.golden.labelapp.labelapp.dto.Validation;
 import com.golden.labelapp.labelapp.dto.YoloV5;
+import com.golden.labelapp.labelapp.repositories.TestRepository;
 import com.golden.labelapp.labelapp.repositories.TrainRepository;
+import com.golden.labelapp.labelapp.repositories.ValidationRepository;
 import com.golden.labelapp.labelapp.repositories.YoloV5Repository;
 import com.golden.labelapp.labelapp.services.DatasetServices;
 
@@ -23,6 +28,12 @@ public class DatasetImpl implements DatasetServices {
 
     @Autowired
     private YoloV5Repository yoloV5Repository;
+
+    @Autowired
+    private ValidationRepository validationRepository;
+
+    @Autowired
+    private TestRepository testRepository;
 
     @Override
     public List<String> getFolder(String path) {
@@ -55,50 +66,105 @@ public class DatasetImpl implements DatasetServices {
         double train = 0.6;
         // double test=0.2;
         double validation = 0.2;
-        List<String> traindataSet = new ArrayList<>();
-        List<String> testdataSet = new ArrayList<>();
-        List<String> validationdataSet = new ArrayList<>();
+
         int totalSize = name.size();
         int trainSize = (int) (totalSize * train);
         int validationSize = (int) (totalSize * validation);
         // int testSize=totalSize-trainSize-validationSize;
         trainRepository.deleteAll();
+        validationRepository.deleteAll();
+        testRepository.deleteAll();
         Collections.shuffle(name);
         for (int i = 0; i < trainSize; i++) {
-            YoloV5 yolofile = yoloV5Repository.findByName(name.get(i));
-            if (yolofile != null) {
+            YoloV5 yolofiletrain = yoloV5Repository.findByName(name.get(i));
+            if (yolofiletrain != null) {
                
-                List<ObjectDetect> objectdetect = yolofile.getObjectdetect();
+                List<ObjectDetect> objectdetect = yolofiletrain.getObjectdetect();
                 Train trainfile = new Train(name.get(i), objectdetect);
                 trainRepository.save(trainfile);
             }
 
         }
         for (int i = trainSize; i < trainSize + validationSize; i++) {
-            validationdataSet.add(name.get(i));
+            YoloV5 yolofilevalidation = yoloV5Repository.findByName(name.get(i));
+            if (yolofilevalidation != null) {
+               
+                List<ObjectDetect> objectdetect = yolofilevalidation.getObjectdetect();
+                Validation validationfile = new Validation(name.get(i), objectdetect);
+                validationRepository.save(validationfile);
+            }
         }
         for (int i = trainSize + validationSize; i < totalSize; i++) {
-            testdataSet.add(name.get(i));
-        }
-
-    }
-
-    @Override
-    public StringBuilder convertJsonToYoloV5(String name) {
-        YoloV5 yoloV5 = yoloV5Repository.findByName(name);
-        StringBuilder result = new StringBuilder();
-        for (ObjectDetect od : yoloV5.getObjectdetect()) {
-            result.append(od.getIdlabel()).append(" ");
-            for (Object point : od.getPoints()) {
-                String pointString = point.toString().replace("[", "")
-                        .replace("]", "").replace(",", "");
-
-                result.append(pointString).append(" ");
+            YoloV5 yolofiletest = yoloV5Repository.findByName(name.get(i));
+            if (yolofiletest != null) {
+               
+                List<ObjectDetect> objectdetect = yolofiletest.getObjectdetect();
+                Test testfile = new Test(name.get(i), objectdetect);
+                testRepository.save(testfile);
             }
-            result.deleteCharAt(result.length() - 1);
-            result.append("\n");
+            
         }
-        return result;
+
     }
 
+  
+    @Override
+    public List<DatasetRequest> convertJsonToYoloV5(String collectionName) {
+        List<?> documents;
+
+        switch (collectionName.toLowerCase()) {
+            case "train":
+                documents = trainRepository.findAll();
+                break;
+            case "test":
+                documents = testRepository.findAll();
+                break;
+            case "validation":
+                documents = validationRepository.findAll();
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid collection name: " + collectionName);
+        }
+
+        List<DatasetRequest> resultList = new ArrayList<>();
+        
+        for (Object doc : documents) {
+            StringBuilder result = new StringBuilder();
+            String docName;
+            List<ObjectDetect> objectDetects;
+            
+            if (doc instanceof Train) {
+                docName = ((Train) doc).getName();
+                objectDetects = ((Train) doc).getPoints();
+            } else if (doc instanceof Test) {
+                docName = ((Test) doc).getName();
+                objectDetects = ((Test) doc).getPoints();
+            } else if (doc instanceof Validation) {
+                docName = ((Validation) doc).getName();
+                objectDetects = ((Validation) doc).getPoints();
+            } else {
+                continue;
+            }
+
+            for (ObjectDetect od : objectDetects) {
+                result.append(od.getIdlabel()).append(" ");
+                for (Object point : od.getPoints()) {
+                    String pointString = point.toString().replace("[", "")
+                            .replace("]", "").replace(",", "");
+                    result.append(pointString).append(" ");
+                }
+                result.deleteCharAt(result.length() - 1);
+                result.append("\n");
+            }
+            resultList.add(new DatasetRequest(docName, result));
+        }
+        
+        return resultList;
+    }
+
+    
 }
+
+
+
+
