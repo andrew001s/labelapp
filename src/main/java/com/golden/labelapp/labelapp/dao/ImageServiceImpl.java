@@ -6,6 +6,9 @@ import com.golden.labelapp.labelapp.services.ImageServices;
 
 
 import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +17,8 @@ import com.golden.labelapp.labelapp.repositories.ImageRespository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Service
 public class ImageServiceImpl implements ImageServices {
@@ -25,6 +30,8 @@ public class ImageServiceImpl implements ImageServices {
 
     @Autowired
     private YoloV5Impl yoloV5Impl;
+
+
 
     @SuppressWarnings("unchecked")
     @Override
@@ -55,7 +62,7 @@ public class ImageServiceImpl implements ImageServices {
     }
 
     
-
+    
     public Image saveImage(Image img) {
         int id=0;
         if (imageRepository.findAll().size() > 0) {
@@ -65,6 +72,36 @@ public class ImageServiceImpl implements ImageServices {
         return imageRepository.save(img);
     }
    
+    @Override
+    @SuppressWarnings("null")
+    public Map<String, Object> uploadImage(List<MultipartFile> file, String path) {
+        List<Map<String, Object>> responses = new ArrayList<>();
+        for (MultipartFile f : file) {
+            try {
+                Path uploatdPath = Paths.get(path).toAbsolutePath().normalize();
+                if(!Files.exists(uploatdPath)){
+                    Files.createDirectories(uploatdPath);
+                }
+                String filename = f.getOriginalFilename();
+                Path filepath = uploatdPath.resolve(filename);
+                Files.write(filepath, f.getBytes());
+                String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/download/")
+                        .path(filename).toUriString();
+                Map<String, Object> res = new HashMap<>();
+                res.put("message", "File uploaded successfully");
+                res.put("file", filename);
+                res.put("url", fileDownloadUri);
+                responses.add(res);
+            } catch (Exception e) {
+                Map<String, Object> res = new HashMap<>();
+                res.put("message", "Could not upload the file: " + f.getOriginalFilename() + "!");
+                responses.add(res);
+                return res;
+            }
+        }
+        return responses.get(0);
+    
+    }
 
     @Override
     public Image insertImage(Image img) {

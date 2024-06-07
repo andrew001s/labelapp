@@ -3,7 +3,9 @@ package com.golden.labelapp.labelapp.dao;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ import com.golden.labelapp.labelapp.repositories.TrainRepository;
 import com.golden.labelapp.labelapp.repositories.ValidationRepository;
 import com.golden.labelapp.labelapp.repositories.YoloV5Repository;
 import com.golden.labelapp.labelapp.services.DatasetServices;
+
 
 @Service
 public class DatasetImpl implements DatasetServices {
@@ -162,7 +165,18 @@ public class DatasetImpl implements DatasetServices {
         return resultList;
     }
 
-    
+    @Override
+    public Map<String, Object> generate_config_yaml(List<String> names, List<String> keys) {
+        // Crear un LinkedHashMap para preservar el orden de inserción
+        Map<String, Object> configYaml = new LinkedHashMap<>();
+        configYaml.put("train", "../yolov5/data_set/images/train/");
+        configYaml.put("val", "../yolov5/data_set/images/val/");
+        configYaml.put("test", "../yolov5/data_set/images/test/");
+        configYaml.put("nc", keys.size());
+        configYaml.put("names", keys);
+        return configYaml;
+    }
+        
 }
 
 

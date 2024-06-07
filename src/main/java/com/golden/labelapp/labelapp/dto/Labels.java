@@ -1,5 +1,7 @@
 package com.golden.labelapp.labelapp.dto;
 
+import java.util.List;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import jakarta.persistence.Entity;
@@ -43,4 +45,12 @@ public class Labels {
          this.cant = cant;
     }
 
+    public String toStringLabe(List<Labels> labels) {
+        String result = "";
+        for (Labels label : labels) {
+            result=result+"\n"+ "- " + label.getLabel();
+        }
+        return result;
+    }
+    
 }
