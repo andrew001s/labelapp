@@ -8,4 +8,5 @@ import com.golden.labelapp.labelapp.dto.Labels;
 
 public interface LabelsRepository extends MongoRepository<Labels, Integer>{
     List<Labels> findByLabel(String labelclass);
+    Labels getLabelById(int id);
 }

@@ -42,7 +42,12 @@ public class LabelServicesImpl implements LabelServices {
         } else {
             
             cant = 1;
-            id = labelsRepository.findAll().get(labelsRepository.findAll().size() - 1).getId() + 1;
+            List<Labels> allLabels = labelsRepository.findAll();
+            if (allLabels.isEmpty()) {
+                id = 0;
+            } else {
+                id = labelsRepository.findAll().get(labelsRepository.findAll().size() - 1).getId() + 1;
+            }
             Labels newLabel = new Labels(id,labelclass, cant);
             labelsRepository.save(newLabel); 
         }
@@ -56,6 +61,11 @@ public class LabelServicesImpl implements LabelServices {
         } else {
             return -1;
         }
+    }
+
+    @Override
+    public Labels getLabelById(int id) {
+        return labelsRepository.getLabelById(id);
     }
 
 }

@@ -59,9 +59,12 @@ public class yolov5Controller {
         ByteArrayOutputStream zipBytes = new ByteArrayOutputStream();
         try (ZipOutputStream zipOut = new ZipOutputStream(zipBytes)) {
             // Generar y escribir el archivo config.yaml
-            List<String> keys = labelServicesImpl.getAllLabels().stream()
-                    .map(Labels::getLabel)
-                    .collect(Collectors.toList());
+            Map<Integer, String> keys = labelServicesImpl.getAllLabels().stream()
+                                            .filter(label -> label.getCant() > 13)
+                                            .collect(Collectors.toMap(
+                                                label ->label.getId(), 
+                                                label -> label.getLabel()
+                                            ));
             List<String> names = datasetServices.getFolder("src/main/resources/images");
             Map<String, Object> configYaml = datasetServices.generate_config_yaml(names, keys);
             writeYamlToZip(zipOut, configYaml, "config/config.yaml");
@@ -69,7 +72,7 @@ public class yolov5Controller {
             // Iterar sobre las colecciones y agregar los documentos al ZIP
             for (String collectionName : collections) {
                 List<DatasetRequest> resultList = datasetServices.convertJsonToYoloV5(collectionName);
-                String labelDirName = "labels_me/" + collectionName + "/";
+                String labelDirName = "labels/" + collectionName + "/";
                 String imageDirName = "images/" + collectionName + "/";
 
                 for (DatasetRequest docResult : resultList) {
@@ -101,7 +104,8 @@ public class yolov5Controller {
     private void writeYamlToZip(ZipOutputStream zipOut, Object data, String filename) throws IOException {
         DumperOptions options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        options.setPrettyFlow(true);
+        options.setPrettyFlow(false);
+        options.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
         Yaml yaml = new Yaml(options);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
