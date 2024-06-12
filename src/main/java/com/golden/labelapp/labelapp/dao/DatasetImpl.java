@@ -87,51 +87,31 @@ public class DatasetImpl implements DatasetServices {
             YoloV5 yolofiletrain = yoloV5Repository.findByName(name.get(i));
             if (yolofiletrain != null) {
                 List<ObjectDetect> objectdetect = yolofiletrain.getObjectdetect();
-                List<ObjectDetect> validObjectDetects = new ArrayList<>();
-                for (ObjectDetect od : objectdetect) {
-                    Labels label = labelsRepository.getLabelById(od.getIdlabel());
-                    if (label != null && label.getCant() > 13){
-                        validObjectDetects.add(od);
-                    }
-                }
-                if (!validObjectDetects.isEmpty()) {
-                    Train trainfile = new Train(name.get(i), validObjectDetects);
-                    trainRepository.save(trainfile);
-                }
+                
+                Train trainfile = new Train(name.get(i), objectdetect);
+                trainRepository.save(trainfile);
+                
             }
         }
         for (int i = trainSize; i < trainSize + validationSize; i++) {
             YoloV5 yolofilevalidation = yoloV5Repository.findByName(name.get(i));
             if (yolofilevalidation != null) {
                 List<ObjectDetect> objectdetect = yolofilevalidation.getObjectdetect();
-                List<ObjectDetect> validObjectDetects = new ArrayList<>();
-                for (ObjectDetect od : objectdetect) {
-                    Labels label = labelsRepository.getLabelById(od.getIdlabel());
-                    if (label != null && label.getCant() > 13){
-                        validObjectDetects.add(od);
-                    }
-                }
-                if (!validObjectDetects.isEmpty()) {
-                    Validation validationfile = new Validation(name.get(i), validObjectDetects);
-                    validationRepository.save(validationfile);
-                }
+                
+                Validation validationfile = new Validation(name.get(i), objectdetect);
+                validationRepository.save(validationfile);
+                
             }
         }
         for (int i = trainSize + validationSize; i < totalSize; i++) {
             YoloV5 yolofiletest = yoloV5Repository.findByName(name.get(i));
             if (yolofiletest != null) {
                 List<ObjectDetect> objectdetect = yolofiletest.getObjectdetect();
-                List<ObjectDetect> validObjectDetects = new ArrayList<>();
-                for (ObjectDetect od : objectdetect) {
-                    Labels label = labelsRepository.getLabelById(od.getIdlabel());
-                    if (label != null && label.getCant() > 13){
-                        validObjectDetects.add(od);
-                    }
-                }
-                if (!validObjectDetects.isEmpty()) {
-                    Test testfile = new Test(name.get(i), validObjectDetects);
-                    testRepository.save(testfile);
-                }
+              
+                
+                Test testfile = new Test(name.get(i), objectdetect);
+                testRepository.save(testfile);
+                
             }
         }
 
@@ -196,9 +176,10 @@ public class DatasetImpl implements DatasetServices {
     public Map<String, Object> generate_config_yaml(List<String> names, Map<Integer, String> keys) {
         // Crear un LinkedHashMap para preservar el orden de inserción
         Map<String, Object> configYaml = new LinkedHashMap<>();
-        configYaml.put("train", "../images/train/");
-        configYaml.put("val", "../images/val/");
-        configYaml.put("test", "../images/test/");
+        configYaml.put("path", "../dataset/images");
+        configYaml.put("train", "train");
+        configYaml.put("val", "val");
+        configYaml.put("test", "test");
         configYaml.put("nc", keys.size());
         configYaml.put("names", keys);
         return configYaml;

@@ -10,4 +10,5 @@ public interface LabelServices {
     void saveLabel(String labelclass);
     int getLabelId(String labelclass);
     Labels getLabelById(int id);
+    Labels getLabelByName(String name);
 } 

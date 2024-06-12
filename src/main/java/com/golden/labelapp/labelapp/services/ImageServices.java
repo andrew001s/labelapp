@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.golden.labelapp.labelapp.dto.Image;
+import com.golden.labelapp.labelapp.dto.Labels;
 
 
 public interface ImageServices {
@@ -14,7 +15,7 @@ public interface ImageServices {
     List<Image> getAllImages();
     Image getImageById(int id);
     void deleteImage(int id);
-    void convertToYoloV5(Map<String, Object> info_dict,List<Integer> id, int height, int width, String name);
+    void convertToYoloV5(Map<String, Object> info_dict, int height, int width, String name,List<Labels> labels);
     Map<String, Object> uploadImage(List<MultipartFile> file, String path);
     
 }

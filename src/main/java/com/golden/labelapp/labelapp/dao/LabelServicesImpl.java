@@ -68,4 +68,9 @@ public class LabelServicesImpl implements LabelServices {
         return labelsRepository.getLabelById(id);
     }
 
+    @Override
+    public Labels getLabelByName(String name) {
+       return labelsRepository.getLabelByLabel(name);
+    }
+
 }

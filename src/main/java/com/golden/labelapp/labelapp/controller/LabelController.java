@@ -9,8 +9,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.golden.labelapp.labelapp.dto.Image;
 import com.golden.labelapp.labelapp.dto.Labels;
+import com.golden.labelapp.labelapp.services.ImageServices;
 import com.golden.labelapp.labelapp.services.LabelServices;
+import org.springframework.web.bind.annotation.PostMapping;
+
 
 
 
@@ -20,7 +24,8 @@ import com.golden.labelapp.labelapp.services.LabelServices;
 public class LabelController {
     @Autowired
     private LabelServices labelServicesImpl;
-
+    @Autowired
+    private ImageServices imageServices;
     @Transactional(readOnly = true)
     @GetMapping("/all")
     public List<Labels> getAllLabels() {
@@ -32,6 +37,22 @@ public class LabelController {
     public int getLabelByName(@PathVariable String name) {
         return labelServicesImpl.getLabelId(name);
     }
+
+    @Transactional
+    @PostMapping("/saveLabel")
+    public String saveLabel() {
+        
+        List<Image> images = imageServices.getAllImages();
+        for (Object element : images) {
+            for (Object element2 : ((Image) element).getShapes()) {
+                String label = (String) ((java.util.Map<String, Object>) element2).get("label");
+                labelServicesImpl.saveLabel(label);
+            }
+
+        }
+        return "Finalizado";
+    }
+    
     
     
 }

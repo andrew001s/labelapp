@@ -1,9 +1,10 @@
 package com.golden.labelapp.labelapp.dao;
 
 import com.golden.labelapp.labelapp.dto.Image;
+import com.golden.labelapp.labelapp.dto.Labels;
 import com.golden.labelapp.labelapp.dto.ObjectDetect;
 import com.golden.labelapp.labelapp.services.ImageServices;
-
+import com.golden.labelapp.labelapp.services.LabelServices;
 
 import java.util.Map;
 import java.nio.file.Files;
@@ -26,7 +27,7 @@ public class ImageServiceImpl implements ImageServices {
     @Autowired
     private ImageRespository imageRepository;
     @Autowired
-    private LabelServicesImpl labelServicesImpl;
+    private LabelServices labelServicesImpl;
 
     @Autowired
     private YoloV5Impl yoloV5Impl;
@@ -40,24 +41,22 @@ public class ImageServiceImpl implements ImageServices {
         Map<String, Object> info_dict = new HashMap<>();
         Map<String, Object> bboxes = new HashMap<>();
         info_dict.put("filename", img.getName());
-        List<Integer> idlabel=new ArrayList<>();
         info_dict.put("bboxes", bboxes);
         for (Object element : img.getShapes()) {
             Map<String, Object> bbox = new HashMap<>();
             bboxes.put("bbox" + index, bbox);
             String label = (String) ((Map<String, Object>) element).get("label");
-            labelServicesImpl.saveLabel(label);
+            
             bbox.put("label", label);
             bbox.put("points", ((Map<String, Object>) element).get("points"));
             index++;
-            idlabel.add(labelServicesImpl.getLabelId(label));
             
         }
         
         info_dict.put("size", img.getSize());
-        saveImage(img);
+        //saveImage(img);
         
-        convertToYoloV5(info_dict,idlabel,img.getHeight(),img.getWidth(),img.getName());
+        
         return info_dict;
     }
 
@@ -124,16 +123,15 @@ public class ImageServiceImpl implements ImageServices {
     public void deleteImage(int id) {
         imageRepository.deleteById(id);
     }
-
-
+     
     @SuppressWarnings("unchecked")
     @Override
-    public void convertToYoloV5(Map<String, Object> info_dict,List<Integer> id, int height, int width, String name) {
-        
+    public void convertToYoloV5(Map<String, Object> info_dict, int height, int width, String name,List<Labels> labels) {
+            
         Map<String, Object> bboxes = (Map<String, Object>) info_dict.get("bboxes");
         List<ObjectDetect> objlist = new ArrayList<>();
-
-        int i=0;
+      
+        int i = 0;
         for (String key : bboxes.keySet()) {
             Map<String, Object> bbox = (Map<String, Object>) bboxes.get(key);
             List<List<Double>> points = (List<List<Double>>) bbox.get("points");
@@ -146,12 +144,20 @@ public class ImageServiceImpl implements ImageServices {
                 pointList.add(y);
                 retval.add(pointList);
             }
-            int idlabel=id.get(i);
-            ObjectDetect yolo = new ObjectDetect(idlabel, retval);
-            objlist.add(yolo);
-            i++;
-           
+        
+            String labelName = (String) bbox.get("label");
+
+            for (Labels label : labels) {
+                if (label.getLabel().equals(labelName)) {
+                    ObjectDetect obj = new ObjectDetect(label.getId(), retval, label.getLabel());
+                    objlist.add(obj);
+                    i++;
+                }
+            }
         }
+            
+           
+        
         yoloV5Impl.saveYoloV5(name,objlist);
        
     }
