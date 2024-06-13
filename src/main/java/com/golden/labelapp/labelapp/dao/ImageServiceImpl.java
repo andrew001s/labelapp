@@ -1,33 +1,30 @@
 package com.golden.labelapp.labelapp.dao;
 
-import com.golden.labelapp.labelapp.dto.Image;
-import com.golden.labelapp.labelapp.dto.Labels;
-import com.golden.labelapp.labelapp.dto.ObjectDetect;
-import com.golden.labelapp.labelapp.services.ImageServices;
-import com.golden.labelapp.labelapp.services.LabelServices;
-
-import java.util.Map;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import com.golden.labelapp.labelapp.repositories.ImageRespository;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.golden.labelapp.labelapp.dto.Image;
+import com.golden.labelapp.labelapp.dto.Labels;
+import com.golden.labelapp.labelapp.dto.ObjectDetect;
+import com.golden.labelapp.labelapp.repositories.ImageRespository;
+import com.golden.labelapp.labelapp.services.ImageServices;
+
 @Service
 public class ImageServiceImpl implements ImageServices {
 
     @Autowired
     private ImageRespository imageRepository;
-    @Autowired
-    private LabelServices labelServicesImpl;
+
 
     @Autowired
     private YoloV5Impl yoloV5Impl;

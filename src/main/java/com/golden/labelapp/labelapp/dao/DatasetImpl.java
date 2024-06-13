@@ -11,13 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.golden.labelapp.labelapp.dto.DatasetRequest;
-import com.golden.labelapp.labelapp.dto.Labels;
 import com.golden.labelapp.labelapp.dto.ObjectDetect;
 import com.golden.labelapp.labelapp.dto.Test;
 import com.golden.labelapp.labelapp.dto.Train;
 import com.golden.labelapp.labelapp.dto.Validation;
 import com.golden.labelapp.labelapp.dto.YoloV5;
-import com.golden.labelapp.labelapp.repositories.LabelsRepository;
 import com.golden.labelapp.labelapp.repositories.TestRepository;
 import com.golden.labelapp.labelapp.repositories.TrainRepository;
 import com.golden.labelapp.labelapp.repositories.ValidationRepository;
@@ -40,8 +38,6 @@ public class DatasetImpl implements DatasetServices {
     @Autowired
     private TestRepository testRepository;
 
-    @Autowired
-    private LabelsRepository labelsRepository;
     @Override
     public List<String> getFolder(String path) {
         File folder = new File(path);

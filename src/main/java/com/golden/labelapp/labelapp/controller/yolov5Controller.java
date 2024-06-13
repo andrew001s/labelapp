@@ -129,6 +129,7 @@ public class yolov5Controller {
             for (Image img : images) {
                 info_dict = imageServices.extractInfoFromJson(img);
                 for (Object element : img.getShapes()) {
+                    @SuppressWarnings("unchecked")
                     String label = (String) ((Map<String, Object>) element).get("label");
                     if (!labels.stream().map(Labels::getLabel).collect(Collectors.toList()).contains(label)) {
                         int cant = labelServicesImpl.getLabelByName(label).getCant();

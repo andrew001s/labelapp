@@ -1,6 +1,7 @@
 package com.golden.labelapp.labelapp.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +46,8 @@ public class LabelController {
         List<Image> images = imageServices.getAllImages();
         for (Object element : images) {
             for (Object element2 : ((Image) element).getShapes()) {
-                String label = (String) ((java.util.Map<String, Object>) element2).get("label");
+                @SuppressWarnings("unchecked")
+                String label = (String) ((Map<String, Object>) element2).get("label");
                 labelServicesImpl.saveLabel(label);
             }
 
