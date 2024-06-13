@@ -15,6 +15,9 @@ import com.golden.labelapp.labelapp.dto.Labels;
 import com.golden.labelapp.labelapp.repositories.LabelsRepository;
 import com.golden.labelapp.labelapp.services.LabelServices;
 
+/**
+ * Implementación de la interfaz LabelServices que proporciona métodos para realizar operaciones relacionadas con las etiquetas.
+ */
 @Service
 public class LabelServicesImpl implements LabelServices {
     @Autowired
@@ -23,26 +26,36 @@ public class LabelServicesImpl implements LabelServices {
     @Autowired
     private MongoTemplate mongoTemplate;
 
+    /**
+     * Obtiene todas las etiquetas existentes.
+     * 
+     * @return una lista de objetos Labels que representan todas las etiquetas existentes.
+     */
     @Override
     public List<Labels> getAllLabels() {
         return (List<Labels>) labelsRepository.findAll();
     }
 
+    /**
+     * Guarda una nueva etiqueta o actualiza una existente.
+     * 
+     * @param labelclass la clase de la etiqueta a guardar o actualizar.
+     */
     @Override
     public void saveLabel(String labelclass) {
         List<Labels> existingLabels = labelsRepository.findByLabel(labelclass);
-        int id =0;
-        int cant=0;
+        int id = 0;
+        int cant = 0;
         if (!existingLabels.isEmpty()) {
             id = existingLabels.get(0).getId();
             Labels existingLabel = existingLabels.get(0);
-            existingLabel.setCant(existingLabel.getCant() + 1); 
+            existingLabel.setCant(existingLabel.getCant() + 1);
             Query query = new Query(Criteria.where("id").is(id));
             Update update = new Update().set("cant", existingLabel.getCant());
             mongoTemplate.updateFirst(query, update, Labels.class);
-            
+
         } else {
-            
+
             cant = 1;
             List<Labels> allLabels = labelsRepository.findAll();
             if (allLabels.isEmpty()) {
@@ -50,11 +63,17 @@ public class LabelServicesImpl implements LabelServices {
             } else {
                 id = labelsRepository.findAll().get(labelsRepository.findAll().size() - 1).getId() + 1;
             }
-            Labels newLabel = new Labels(id,labelclass, cant);
-            labelsRepository.save(newLabel); 
+            Labels newLabel = new Labels(id, labelclass, cant);
+            labelsRepository.save(newLabel);
         }
     }
 
+    /**
+     * Obtiene el ID de una etiqueta por su clase.
+     * 
+     * @param labelclass la clase de la etiqueta.
+     * @return el ID de la etiqueta si existe, de lo contrario, -1.
+     */
     @Override
     public int getLabelId(String labelclass) {
         List<Labels> existingLabels = labelsRepository.findByLabel(labelclass);
@@ -65,22 +84,46 @@ public class LabelServicesImpl implements LabelServices {
         }
     }
 
+    /**
+     * Obtiene una etiqueta por su ID.
+     * 
+     * @param id el ID de la etiqueta.
+     * @return un objeto Labels que representa la etiqueta encontrada.
+     */
     @Override
     public Labels getLabelById(int id) {
         return labelsRepository.getLabelById(id);
     }
 
+    /**
+     * Obtiene una etiqueta por su nombre.
+     * 
+     * @param name el nombre de la etiqueta.
+     * @return un objeto Labels que representa la etiqueta encontrada.
+     */
     @Override
     public Labels getLabelByName(String name) {
-       return labelsRepository.getLabelByLabel(name);
+        return labelsRepository.getLabelByLabel(name);
     }
 
+    /**
+     * Elimina una etiqueta por su ID.
+     * 
+     * @param id el ID de la etiqueta a eliminar.
+     */
     @Override
     @Transactional
     public void deleteLabel(int id) {
         labelsRepository.deleteById(id);
     }
 
+    /**
+     * Actualiza una etiqueta existente.
+     * 
+     * @param label el objeto Labels que contiene los nuevos datos de la etiqueta.
+     * @param id el ID de la etiqueta a actualizar.
+     * @return un objeto Optional que contiene la etiqueta actualizada si existe, de lo contrario, vacío.
+     */
     @Override
     @Transactional
     public Optional<Labels> updateLabel(Labels label, int id) {
@@ -96,7 +139,4 @@ public class LabelServicesImpl implements LabelServices {
             return Optional.empty();
         }
     }
-
-
-
 }

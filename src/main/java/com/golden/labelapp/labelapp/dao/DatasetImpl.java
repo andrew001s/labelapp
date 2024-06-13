@@ -1,3 +1,7 @@
+/**
+ * Esta clase implementa la interfaz DatasetServices y proporciona la implementación de los métodos definidos en la interfaz.
+ * Se encarga de realizar operaciones relacionadas con la manipulación de conjuntos de datos.
+ */
 package com.golden.labelapp.labelapp.dao;
 
 import java.io.File;
@@ -22,7 +26,6 @@ import com.golden.labelapp.labelapp.repositories.ValidationRepository;
 import com.golden.labelapp.labelapp.repositories.YoloV5Repository;
 import com.golden.labelapp.labelapp.services.DatasetServices;
 
-
 @Service
 public class DatasetImpl implements DatasetServices {
 
@@ -38,6 +41,13 @@ public class DatasetImpl implements DatasetServices {
     @Autowired
     private TestRepository testRepository;
 
+    /**
+     * Obtiene una lista de nombres de archivos en una carpeta dada.
+     * 
+     * @param path La ruta de la carpeta.
+     * @return Una lista de nombres de archivos en la carpeta.
+     * @throws RuntimeException Si la ruta de la carpeta no es válida o no existe.
+     */
     @Override
     public List<String> getFolder(String path) {
         File folder = new File(path);
@@ -54,6 +64,12 @@ public class DatasetImpl implements DatasetServices {
         return files;
     }
 
+    /**
+     * Verifica si un archivo dado es una imagen basándose en su extensión.
+     * 
+     * @param path La ruta del archivo.
+     * @return true si el archivo es una imagen, false de lo contrario.
+     */
     private boolean isImage(String path) {
         String[] validExtensions = { "jpg", "jpeg", "png" };
         for (String extension : validExtensions) {
@@ -64,16 +80,20 @@ public class DatasetImpl implements DatasetServices {
         return false;
     }
 
+    /**
+     * Genera un conjunto de datos a partir de una lista de nombres de archivos.
+     * Divide los archivos en conjuntos de entrenamiento, validación y prueba según las proporciones especificadas.
+     * 
+     * @param name La lista de nombres de archivos.
+     */
     @Override
     public void generateDataset(List<String> name) {
         double train = 0.6;
-        // double test=0.2;
         double validation = 0.2;
 
         int totalSize = name.size();
         int trainSize = (int) (totalSize * train);
         int validationSize = (int) (totalSize * validation);
-        // int testSize=totalSize-trainSize-validationSize;
         trainRepository.deleteAll();
         validationRepository.deleteAll();
         testRepository.deleteAll();
@@ -113,7 +133,13 @@ public class DatasetImpl implements DatasetServices {
 
     }
 
-  
+    /**
+     * Convierte los documentos de una colección dada en objetos DatasetRequest.
+     * 
+     * @param collectionName El nombre de la colección.
+     * @return Una lista de objetos DatasetRequest.
+     * @throws IllegalArgumentException Si el nombre de la colección es inválido.
+     */
     @Override
     public List<DatasetRequest> convertJsonToYoloV5(String collectionName) {
         List<?> documents;
@@ -168,6 +194,13 @@ public class DatasetImpl implements DatasetServices {
         return resultList;
     }
 
+    /**
+     * Genera un mapa de configuración YAML para YOLOv5 a partir de una lista de nombres y un mapa de labels.
+     * 
+     * @param names La lista de nombres.
+     * @param keys El mapa de labels.
+     * @return Un mapa de configuración YAML.
+     */
     @Override
     public Map<String, Object> generate_config_yaml(List<String> names, Map<Integer, String> keys) {
         // Crear un LinkedHashMap para preservar el orden de inserción

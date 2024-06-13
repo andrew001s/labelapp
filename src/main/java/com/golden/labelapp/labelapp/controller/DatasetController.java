@@ -34,6 +34,9 @@ import com.golden.labelapp.labelapp.dto.YoloV5;
 import com.golden.labelapp.labelapp.services.DatasetServices;
 import com.golden.labelapp.labelapp.services.YoloV5Service;
 
+/**
+ * Controlador para el manejo de los conjuntos de datos.
+ */
 @RestController
 @RequestMapping("/dataset")
 public class DatasetController {
@@ -46,6 +49,10 @@ public class DatasetController {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
+    /**
+     * Método para obtener los archivos del directorio de carga y generar el conjunto de datos.
+     * @return ResponseEntity con la lista de nombres de archivos generados.
+     */
     @Transactional
     @PostMapping("path")
     public ResponseEntity<?> getFiles() {
@@ -58,15 +65,23 @@ public class DatasetController {
         }
     }
 
+    /**
+     * Genera el conjunto de datos a partir de los nombres de archivos proporcionados.
+     * @param names Lista de nombres de archivos.
+     */
     public void generateDataset(List<String> names) {
         List<String> name = new ArrayList<>();
         for (String n : names) {
             name.add(n);
         }
         datasetServices.generateDataset(name);
-
     }
 
+    /**
+     * Método para descargar todos los documentos del conjunto de datos en formato ZIP.
+     * @return ResponseEntity con el archivo ZIP que contiene los documentos.
+     * @throws IOException Si ocurre un error al leer los archivos o escribir en el archivo ZIP.
+     */
     @Transactional(readOnly = true)
     @GetMapping("/downloaddataset")
     public ResponseEntity<?> downloadAllDocuments() throws IOException {

@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -26,7 +25,9 @@ import com.golden.labelapp.labelapp.dto.ObjectDetect;
 import com.golden.labelapp.labelapp.repositories.ImageRespository;
 import com.golden.labelapp.labelapp.services.ImageServices;
 
- 
+/**
+ * Implementación de la interfaz ImageServices que proporciona métodos para el manejo de imágenes.
+ */
 @Service
 public class ImageServiceImpl implements ImageServices {
     @Autowired
@@ -35,12 +36,15 @@ public class ImageServiceImpl implements ImageServices {
     @Autowired
     private ImageRespository imageRepository;
 
-
     @Autowired
     private YoloV5Impl yoloV5Impl;
 
-    
-
+    /**
+     * Extrae la información de una imagen en formato JSON y la convierte en un mapa de datos.
+     * 
+     * @param img La imagen en formato JSON.
+     * @return Un mapa de datos que contiene la información extraída de la imagen.
+     */
     @SuppressWarnings("unchecked")
     @Override
     public Map<String, Object> extractInfoFromJson(Image img) {
@@ -57,17 +61,19 @@ public class ImageServiceImpl implements ImageServices {
             bbox.put("label", label);
             bbox.put("points", ((Map<String, Object>) element).get("points"));
             index++;
-            
         }
         
         info_dict.put("size", img.getSize());
-        //saveImage(img);
-        
         
         return info_dict;
     }
 
-    
+    /**
+     * Inserta una imagen en la base de datos.
+     * 
+     * @param img La imagen a insertar.
+     * @return La imagen insertada.
+     */
     @Override
     public Image insertImage(Image img) {
         int id=0;
@@ -78,6 +84,13 @@ public class ImageServiceImpl implements ImageServices {
         return imageRepository.save(img);
     }
    
+    /**
+     * Sube una o varias imágenes al servidor.
+     * 
+     * @param file La(s) imagen(es) a subir.
+     * @param path La ruta donde se guardarán las imágenes.
+     * @return Un mapa de datos que contiene la información de las imágenes subidas.
+     */
     @Override
     @SuppressWarnings("null")
     public Map<String, Object> uploadImage(List<MultipartFile> file, String path) {
@@ -106,30 +119,53 @@ public class ImageServiceImpl implements ImageServices {
             }
         }
         return responses.get(0);
-    
     }
 
+    /**
+     * Obtiene todas las imágenes almacenadas en la base de datos.
+     * 
+     * @return Una lista de todas las imágenes almacenadas.
+     */
     @Override
     public List<Image> getAllImages() {
         return imageRepository.findAll();
     }
 
+    /**
+     * Obtiene una imagen por su ID.
+     * 
+     * @param id El ID de la imagen.
+     * @return La imagen encontrada, o un objeto Optional vacío si no se encuentra la imagen.
+     */
     @Override
     @Transactional(readOnly = true)
     public Optional<Image> getImageById(int id) {
         return Optional.ofNullable(imageRepository.findById(id).get());
     }
 
+    /**
+     * Elimina una imagen por su ID.
+     * 
+     * @param id El ID de la imagen a eliminar.
+     */
     @Override
     @Transactional
     public void deleteImage(int id) {
         imageRepository.deleteById(id);
     }
      
+    /**
+     * Convierte la información de una imagen en formato YOLOv5 y la guarda en la base de datos.
+     * 
+     * @param info_dict El mapa de datos que contiene la información de la imagen.
+     * @param height La altura de la imagen.
+     * @param width El ancho de la imagen.
+     * @param name El nombre de la imagen.
+     * @param labels La lista de etiquetas disponibles.
+     */
     @SuppressWarnings("unchecked")
     @Override
-    public void convertToYoloV5(Map<String, Object> info_dict, int height, int width, String name,List<Labels> labels) {
-            
+    public void convertToYoloV5(Map<String, Object> info_dict, int height, int width, String name, List<Labels> labels) {
         Map<String, Object> bboxes = (Map<String, Object>) info_dict.get("bboxes");
         List<ObjectDetect> objlist = new ArrayList<>();
       
@@ -158,14 +194,16 @@ public class ImageServiceImpl implements ImageServices {
             }
         }
             
-           
-        
         yoloV5Impl.saveYoloV5(name,objlist);
-       
     }
 
-
-
+    /**
+     * Actualiza una imagen en la base de datos.
+     * 
+     * @param img La imagen actualizada.
+     * @param id El ID de la imagen a actualizar.
+     * @return La imagen actualizada, o un objeto Optional vacío si no se encuentra la imagen.
+     */
     @Override
     @Transactional
     public Optional<Image> updateImage(Image img, int id) {
@@ -180,18 +218,13 @@ public class ImageServiceImpl implements ImageServices {
             Query query = Query.query(Criteria.where("_id").is(id));
             Image updatedImage = mongoTemplate.findAndModify(query, update, Image.class);
             
-            // Verificar si se actualizó correctamente
             if (updatedImage != null) {
                 return Optional.of(updatedImage);
             } else {
-                // Aquí puedes decidir qué hacer si no se encuentra el documento para actualizar
                 return Optional.empty();
             }
         } else {
-            // Aquí puedes decidir qué hacer si no se encuentra el documento con el ID dado
             return Optional.empty();
         }
     }
-    
-
 }

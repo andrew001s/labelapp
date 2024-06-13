@@ -25,6 +25,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 
+/**
+ * Controlador para la gestión de imágenes.
+ */
 @RestController
 @RequestMapping("/image")
 public class ImageController {
@@ -34,57 +37,80 @@ public class ImageController {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-
+    /**
+     * Inserta una nueva imagen en la base de datos.
+     * 
+     * @param img La imagen a insertar.
+     * @return ResponseEntity con el resultado de la operación.
+     */
     @Transactional
     @PostMapping("/insert")
     public ResponseEntity<?> insertImage(@RequestBody Image img) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(imageServicesImpl.insertImage(img));
-            //return ResponseEntity.status(HttpStatus.CREATED).body(imageServicesImpl.extractInfoFromJson(img));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
 
+    /**
+     * Obtiene todas las imágenes de la base de datos.
+     * 
+     * @return ResponseEntity con la lista de imágenes.
+     */
     @Transactional(readOnly = true)
     @GetMapping("/all")
     public ResponseEntity<?> getAllImages() {
         try {
-            
             return ResponseEntity.ok(imageServicesImpl.getAllImages());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
 
+    /**
+     * Obtiene una imagen por su ID.
+     * 
+     * @param id El ID de la imagen.
+     * @return ResponseEntity con la imagen encontrada.
+     */
     @Transactional(readOnly = true)
     @GetMapping("/get/{id}")
     public ResponseEntity<?> getImageById(@PathVariable int id) {
         try {
-            
             return ResponseEntity.ok(imageServicesImpl.getImageById(id));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
 
-    
+    /**
+     * Elimina una imagen por su ID.
+     * 
+     * @param id El ID de la imagen a eliminar.
+     * @return ResponseEntity con el resultado de la operación.
+     */
     @DeleteMapping("/delete/{id}")
     @Transactional
     public ResponseEntity<?> deleteImage(@PathVariable int id) {
-        try{
+        try {
             Optional<Image> image = imageServicesImpl.getImageById(id);
-            if(image.isPresent()) {
+            if (image.isPresent()) {
                 imageServicesImpl.deleteImage(id);
                 return ResponseEntity.ok(HttpStatus.OK);
             }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
-        return ResponseEntity.badRequest().body("Error: Image not found");
-
+        return ResponseEntity.badRequest().body("Error: Imagen no encontrada");
     }
-    
+
+    /**
+     * Sube una o varias imágenes al servidor.
+     * 
+     * @param files Lista de archivos a subir.
+     * @return ResponseEntity con el resultado de la operación.
+     */
     @PostMapping("/upload")
     public ResponseEntity<?> uploadImage(@RequestParam("files") List<MultipartFile> files) {
         try {
@@ -93,22 +119,26 @@ public class ImageController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
-    
+
+    /**
+     * Actualiza una imagen existente en la base de datos.
+     * 
+     * @param id     El ID de la imagen a actualizar.
+     * @param img    La imagen actualizada.
+     * @param result El resultado de la validación de la imagen.
+     * @return ResponseEntity con el resultado de la operación.
+     */
     @Transactional
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateImage(@PathVariable int id, @RequestBody Image img, BindingResult result) {
-       if(result.hasErrors()) {
-           return ResponseEntity.badRequest().body(result.getAllErrors());
-       }
-       Optional<Image> image = imageServicesImpl.updateImage(img, id);
-         if(image.isPresent()) {
-              return ResponseEntity.ok(HttpStatus.OK);
-         } else {
-              return ResponseEntity.badRequest().body("Error: Image not found");
-         }
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(result.getAllErrors());
+        }
+        Optional<Image> image = imageServicesImpl.updateImage(img, id);
+        if (image.isPresent()) {
+            return ResponseEntity.ok(HttpStatus.OK);
+        } else {
+            return ResponseEntity.badRequest().body("Error: Imagen no encontrada");
+        }
     }
-
-    
-    
-
 }

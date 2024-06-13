@@ -10,24 +10,43 @@ import com.golden.labelapp.labelapp.dto.YoloV5;
 import com.golden.labelapp.labelapp.repositories.YoloV5Repository;
 import com.golden.labelapp.labelapp.services.YoloV5Service;
 
+/**
+ * Implementación de la interfaz YoloV5Service que proporciona métodos para guardar y recuperar objetos YoloV5.
+ */
 @Service
 public class YoloV5Impl implements YoloV5Service{
-
 
     @Autowired
     private YoloV5Repository yoloV5Repository;
     
+    /**
+     * Guarda un objeto YoloV5 en la base de datos.
+     * 
+     * @param name el nombre del objeto YoloV5
+     * @param obj la lista de objetos detectados
+     */
     @Override
     public void saveYoloV5(String name, List<ObjectDetect> obj) {
         YoloV5 yoloV5 = new YoloV5(name,obj);
         yoloV5Repository.save(yoloV5);
     }
 
+    /**
+     * Obtiene todos los objetos YoloV5 almacenados en la base de datos.
+     * 
+     * @return una lista de objetos YoloV5
+     */
     @Override
     public List<YoloV5> getAllYoloV5() {
         return yoloV5Repository.findAll();
     }
 
+    /**
+     * Obtiene un objeto YoloV5 por su nombre.
+     * 
+     * @param name el nombre del objeto YoloV5 a buscar
+     * @return el objeto YoloV5 encontrado, o null si no se encuentra ninguno con ese nombre
+     */
     @Override
     public YoloV5 getYoloV5ByName(String name) {
         return yoloV5Repository.findByName(name);

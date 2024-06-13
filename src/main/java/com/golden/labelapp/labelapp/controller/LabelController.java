@@ -26,6 +26,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 
 
+/**
+ * Esta clase es el controlador para las operaciones relacionadas con las etiquetas.
+ */
 @RestController
 @RequestMapping("/label")
 public class LabelController {
@@ -33,22 +36,38 @@ public class LabelController {
     private LabelServices labelServicesImpl;
     @Autowired
     private ImageServices imageServices;
+
+    /**
+     * Obtiene todas las etiquetas.
+     * 
+     * @return una lista de todas las etiquetas
+     */
     @Transactional(readOnly = true)
     @GetMapping("/all")
     public List<Labels> getAllLabels() {
         return (List<Labels>) labelServicesImpl.getAllLabels();
     }
 
+    /**
+     * Obtiene el ID de una etiqueta por su nombre.
+     * 
+     * @param name el nombre de la etiqueta
+     * @return el ID de la etiqueta
+     */
     @Transactional(readOnly = true)
     @GetMapping("/getid/{name}")
     public int getLabelByName(@PathVariable String name) {
         return labelServicesImpl.getLabelId(name);
     }
 
+    /**
+     * Guarda las etiquetas extraídas de las imágenes.
+     * 
+     * @return un mensaje indicando que la operación ha finalizado
+     */
     @Transactional
     @PostMapping("/saveLabel")
     public String saveLabel() {
-        
         List<Image> images = imageServices.getAllImages();
         for (Object element : images) {
             for (Object element2 : ((Image) element).getShapes()) {
@@ -56,43 +75,59 @@ public class LabelController {
                 String label = (String) ((Map<String, Object>) element2).get("label");
                 labelServicesImpl.saveLabel(label);
             }
-
         }
         return "Finalizado";
     }
     
+    /**
+     * Inserta una nueva etiqueta.
+     * 
+     * @param label la etiqueta a insertar
+     * @return un mensaje indicando que la etiqueta ha sido insertada o un mensaje de error en caso de fallo
+     */
     @Transactional
     @PostMapping("/insertLabel")
     public String insertLabel(@RequestBody String label) {
         try {
             labelServicesImpl.saveLabel(label);
-            return "Label inserted";
+            return "Etiqueta insertada";
         } catch (Exception e) {
             return "Error: " + e.getMessage();
         }
     }
 
+    /**
+     * Actualiza una etiqueta existente.
+     * 
+     * @param id el ID de la etiqueta a actualizar
+     * @param label la etiqueta actualizada
+     * @return una respuesta HTTP indicando que la etiqueta ha sido actualizada o un mensaje de error en caso de fallo
+     */
     @PutMapping("update/{id}")
     @Transactional
     public ResponseEntity<?> putMethodName(@PathVariable String id, @RequestBody Labels label) {
         try {
-           // Labels label2 = labelServicesImpl.getLabelById(Integer.parseInt(id));
             labelServicesImpl.updateLabel(label, Integer.parseInt(id));
-            return ResponseEntity.ok("Label updated");
+            return ResponseEntity.ok("Etiqueta actualizada");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
     
+    /**
+     * Elimina una etiqueta existente.
+     * 
+     * @param id el ID de la etiqueta a eliminar
+     * @return una respuesta HTTP indicando que la etiqueta ha sido eliminada o un mensaje de error en caso de fallo
+     */
     @DeleteMapping("/delete/{id}")
     @Transactional
     public ResponseEntity<?> deleteLabel(@PathVariable int id) {
         try {
             labelServicesImpl.deleteLabel(id);
-            return ResponseEntity.ok("Label deleted");
+            return ResponseEntity.ok("Etiqueta eliminada");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
-    
 }
