@@ -1,13 +1,16 @@
 package com.golden.labelapp.labelapp.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,12 +34,13 @@ public class ImageController {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
+
     @Transactional
     @PostMapping("/insert")
     public ResponseEntity<?> insertImage(@RequestBody Image img) {
         try {
-            
-            return ResponseEntity.status(HttpStatus.CREATED).body(imageServicesImpl.extractInfoFromJson(img));
+            return ResponseEntity.status(HttpStatus.CREATED).body(imageServicesImpl.insertImage(img));
+            //return ResponseEntity.status(HttpStatus.CREATED).body(imageServicesImpl.extractInfoFromJson(img));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
@@ -64,15 +68,21 @@ public class ImageController {
         }
     }
 
-    @Transactional
+    
     @DeleteMapping("/delete/{id}")
+    @Transactional
     public ResponseEntity<?> deleteImage(@PathVariable int id) {
-        try {
-            imageServicesImpl.deleteImage(id);
-            return ResponseEntity.ok("Image deleted");
+        try{
+            Optional<Image> image = imageServicesImpl.getImageById(id);
+            if(image.isPresent()) {
+                imageServicesImpl.deleteImage(id);
+                return ResponseEntity.ok(HttpStatus.OK);
+            }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
+        return ResponseEntity.badRequest().body("Error: Image not found");
+
     }
     
     @PostMapping("/upload")
@@ -84,6 +94,20 @@ public class ImageController {
         }
     }
     
+    @Transactional
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateImage(@PathVariable int id, @RequestBody Image img, BindingResult result) {
+       if(result.hasErrors()) {
+           return ResponseEntity.badRequest().body(result.getAllErrors());
+       }
+       Optional<Image> image = imageServicesImpl.updateImage(img, id);
+         if(image.isPresent()) {
+              return ResponseEntity.ok(HttpStatus.OK);
+         } else {
+              return ResponseEntity.badRequest().body("Error: Image not found");
+         }
+    }
+
     
     
 

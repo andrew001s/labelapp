@@ -60,62 +60,7 @@ public class yolov5Controller {
         return (List<YoloV5>) yoloV5Impl.getAllYoloV5();
     }
 
-    @Transactional(readOnly = true)
-    @GetMapping("/downloaddataset")
-    public ResponseEntity<?> downloadAllDocuments() throws IOException {
-        String[] collections = { "train", "test", "validation" };
-        
-        ByteArrayOutputStream zipBytes = new ByteArrayOutputStream();
-        try (ZipOutputStream zipOut = new ZipOutputStream(zipBytes)) {
-            Map<Integer, String> keys = new HashMap<>();
-            List<YoloV5> yoloV5List = yoloV5Impl.getAllYoloV5();
-            List<String> labelaux = new ArrayList<>();
-            for (YoloV5 yoloV5 : yoloV5List) {
-                for (ObjectDetect objectDetect : yoloV5.getObjectdetect()) {
-                    String label = objectDetect.getLabel();
-                    int id = objectDetect.getIdlabel();
-                    if(!labelaux.contains(label)){
-                        keys.put(id, label);
-                        labelaux.add(label);
-                    }
-                }
-            }
-
-            List<String> names = datasetServices.getFolder("src/main/resources/images");
-            Map<String, Object> configYaml = datasetServices.generate_config_yaml(names, keys);
-            writeYamlToZip(zipOut, configYaml, "config/config.yaml");
-
-            // Iterar sobre las colecciones y agregar los documentos al ZIP
-            for (String collectionName : collections) {
-                List<DatasetRequest> resultList = datasetServices.convertJsonToYoloV5(collectionName);
-                String labelDirName = "labels/" + collectionName + "/";
-                String imageDirName = "images/" + collectionName + "/";
-
-                for (DatasetRequest docResult : resultList) {
-                    // Agregar el archivo de etiqueta al ZIP
-                    String labelFilename = labelDirName + docResult.getName().replaceAll("\\.(jpeg|png|jpg)$", ".txt");
-                    writeStringToZip(zipOut, docResult.getContent().toString(), labelFilename);
-
-                    // Agregar la imagen al ZIP si existe
-                    Path imagePath = Paths.get("src/main/resources/images", docResult.getName());
-                    if (Files.exists(imagePath)) {
-                        writeBytesToZip(zipOut, Files.readAllBytes(imagePath), imageDirName + docResult.getName());
-                    }
-                }
-            }
-        }
-
-        ByteArrayResource resource = new ByteArrayResource(zipBytes.toByteArray());
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=dataset.zip");
-
-        return ResponseEntity.ok()
-                .headers(headers)
-                .contentLength(resource.contentLength())
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
-    }
+  
 
     @Transactional
     @PostMapping("/ToYoloV5")
@@ -151,25 +96,5 @@ public class yolov5Controller {
         }
     }
 
-    private void writeYamlToZip(ZipOutputStream zipOut, Object data, String filename) throws IOException {
-        DumperOptions options = new DumperOptions();
-        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        options.setPrettyFlow(false);
-        options.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
-        Yaml yaml = new Yaml(options);
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        yaml.dump(data, new OutputStreamWriter(baos, StandardCharsets.UTF_8));
-        writeBytesToZip(zipOut, baos.toByteArray(), filename);
-    }
-
-    private void writeStringToZip(ZipOutputStream zipOut, String content, String filename) throws IOException {
-        writeBytesToZip(zipOut, content.getBytes(StandardCharsets.UTF_8), filename);
-    }
-
-    private void writeBytesToZip(ZipOutputStream zipOut, byte[] bytes, String filename) throws IOException {
-        zipOut.putNextEntry(new ZipEntry(filename));
-        zipOut.write(bytes);
-        zipOut.closeEntry();
-    }
 }

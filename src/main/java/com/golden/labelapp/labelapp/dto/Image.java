@@ -3,10 +3,10 @@ package com.golden.labelapp.labelapp.dto;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import jakarta.persistence.Entity;
-@Entity
+import jakarta.persistence.Id;
 @Document(collection = "images")
 public class Image {
-
+    @Id
     private int id;
     private String name;
     private Object[] shapes;

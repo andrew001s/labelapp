@@ -172,9 +172,9 @@ public class DatasetImpl implements DatasetServices {
     public Map<String, Object> generate_config_yaml(List<String> names, Map<Integer, String> keys) {
         // Crear un LinkedHashMap para preservar el orden de inserción
         Map<String, Object> configYaml = new LinkedHashMap<>();
-        configYaml.put("path", "../dataset/images");
+        configYaml.put("path", "Agregar aquí la ruta Absoluta de la carpeta del dataset");
         configYaml.put("train", "train");
-        configYaml.put("val", "val");
+        configYaml.put("val", "validation");
         configYaml.put("test", "test");
         configYaml.put("nc", keys.size());
         configYaml.put("names", keys);

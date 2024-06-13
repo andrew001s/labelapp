@@ -7,9 +7,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -19,9 +26,12 @@ import com.golden.labelapp.labelapp.dto.ObjectDetect;
 import com.golden.labelapp.labelapp.repositories.ImageRespository;
 import com.golden.labelapp.labelapp.services.ImageServices;
 
+ 
 @Service
 public class ImageServiceImpl implements ImageServices {
-
+    @Autowired
+    private MongoTemplate mongoTemplate;
+    
     @Autowired
     private ImageRespository imageRepository;
 
@@ -29,7 +39,7 @@ public class ImageServiceImpl implements ImageServices {
     @Autowired
     private YoloV5Impl yoloV5Impl;
 
-
+    
 
     @SuppressWarnings("unchecked")
     @Override
@@ -58,8 +68,8 @@ public class ImageServiceImpl implements ImageServices {
     }
 
     
-    
-    public Image saveImage(Image img) {
+    @Override
+    public Image insertImage(Image img) {
         int id=0;
         if (imageRepository.findAll().size() > 0) {
             id = imageRepository.findAll().get(imageRepository.findAll().size() - 1).getId() + 1;
@@ -100,23 +110,18 @@ public class ImageServiceImpl implements ImageServices {
     }
 
     @Override
-    public Image insertImage(Image img) {
-
-        return img;
-
-    }
-
-    @Override
     public List<Image> getAllImages() {
         return imageRepository.findAll();
     }
 
     @Override
-    public Image getImageById(int id) {
-        return imageRepository.findById(id).get();
+    @Transactional(readOnly = true)
+    public Optional<Image> getImageById(int id) {
+        return Optional.ofNullable(imageRepository.findById(id).get());
     }
 
     @Override
+    @Transactional
     public void deleteImage(int id) {
         imageRepository.deleteById(id);
     }
@@ -158,5 +163,35 @@ public class ImageServiceImpl implements ImageServices {
         yoloV5Impl.saveYoloV5(name,objlist);
        
     }
+
+
+
+    @Override
+    @Transactional
+    public Optional<Image> updateImage(Image img, int id) {
+        Optional<Image> image = imageRepository.findById(id);
+        if (image.isPresent()) {
+            Update update = new Update();
+            update.set("name", img.getName());
+            update.set("height", img.getHeight());
+            update.set("width", img.getWidth());
+            update.set("shapes", img.getShapes());
+            
+            Query query = Query.query(Criteria.where("_id").is(id));
+            Image updatedImage = mongoTemplate.findAndModify(query, update, Image.class);
+            
+            // Verificar si se actualizó correctamente
+            if (updatedImage != null) {
+                return Optional.of(updatedImage);
+            } else {
+                // Aquí puedes decidir qué hacer si no se encuentra el documento para actualizar
+                return Optional.empty();
+            }
+        } else {
+            // Aquí puedes decidir qué hacer si no se encuentra el documento con el ID dado
+            return Optional.empty();
+        }
+    }
+    
 
 }

@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +17,10 @@ import com.golden.labelapp.labelapp.dto.Labels;
 import com.golden.labelapp.labelapp.services.ImageServices;
 import com.golden.labelapp.labelapp.services.LabelServices;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
+
+
 
 
 
@@ -55,6 +61,38 @@ public class LabelController {
         return "Finalizado";
     }
     
+    @Transactional
+    @PostMapping("/insertLabel")
+    public String insertLabel(@RequestBody String label) {
+        try {
+            labelServicesImpl.saveLabel(label);
+            return "Label inserted";
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
+    }
+
+    @PutMapping("update/{id}")
+    @Transactional
+    public ResponseEntity<?> putMethodName(@PathVariable String id, @RequestBody Labels label) {
+        try {
+           // Labels label2 = labelServicesImpl.getLabelById(Integer.parseInt(id));
+            labelServicesImpl.updateLabel(label, Integer.parseInt(id));
+            return ResponseEntity.ok("Label updated");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
     
+    @DeleteMapping("/delete/{id}")
+    @Transactional
+    public ResponseEntity<?> deleteLabel(@PathVariable int id) {
+        try {
+            labelServicesImpl.deleteLabel(id);
+            return ResponseEntity.ok("Label deleted");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
     
 }

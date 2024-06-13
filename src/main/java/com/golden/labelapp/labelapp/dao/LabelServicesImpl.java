@@ -1,6 +1,7 @@
 package com.golden.labelapp.labelapp.dao;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -8,6 +9,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.golden.labelapp.labelapp.dto.Labels;
 import com.golden.labelapp.labelapp.repositories.LabelsRepository;
@@ -72,5 +74,29 @@ public class LabelServicesImpl implements LabelServices {
     public Labels getLabelByName(String name) {
        return labelsRepository.getLabelByLabel(name);
     }
+
+    @Override
+    @Transactional
+    public void deleteLabel(int id) {
+        labelsRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public Optional<Labels> updateLabel(Labels label, int id) {
+        Optional<Labels> existingLabel = labelsRepository.findById(id);
+        if (existingLabel.isPresent()) {
+            Update update = new Update();
+            update.set("label", label.getLabel());
+            update.set("cant", label.getCant());
+            Query query = Query.query(Criteria.where("_id").is(id));
+            Labels updatedLabel = mongoTemplate.findAndModify(query, update, Labels.class);
+            return Optional.of(updatedLabel);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+
 
 }
