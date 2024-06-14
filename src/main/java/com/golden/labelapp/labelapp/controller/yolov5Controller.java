@@ -20,6 +20,7 @@ import com.golden.labelapp.labelapp.dto.Labels;
 import com.golden.labelapp.labelapp.dto.YoloV5;
 import com.golden.labelapp.labelapp.services.DatasetServices;
 import com.golden.labelapp.labelapp.services.ImageServices;
+import com.golden.labelapp.labelapp.services.LabelServices;
 import com.golden.labelapp.labelapp.services.YoloV5Service;
 
 /**
@@ -28,15 +29,13 @@ import com.golden.labelapp.labelapp.services.YoloV5Service;
 @RestController
 @RequestMapping("/yolov5")
 public class yolov5Controller {
-
+    private int num_labels=13;
     @Autowired
     private YoloV5Service yoloV5Impl;
 
-    @Autowired
-    private DatasetServices datasetServices;
 
     @Autowired
-    private LabelServicesImpl labelServicesImpl;
+    private LabelServices labelServicesImpl;
 
     @Autowired
     private ImageServices imageServices;
@@ -59,6 +58,7 @@ public class yolov5Controller {
      */
     @Transactional
     @PostMapping("/ToYoloV5")
+    @SuppressWarnings("unchecked")
     public ResponseEntity<?> ToYoloV5() {
         try {
             Map<String, Object> info_dict = new HashMap<>();
@@ -69,11 +69,10 @@ public class yolov5Controller {
             for (Image img : images) {
                 info_dict = imageServices.extractInfoFromJson(img);
                 for (Object element : img.getShapes()) {
-                    @SuppressWarnings("unchecked")
                     String label = (String) ((Map<String, Object>) element).get("label");
                     if (!labels.stream().map(Labels::getLabel).collect(Collectors.toList()).contains(label)) {
                         int cant = labelServicesImpl.getLabelByName(label).getCant();
-                        if (cant > 13) {
+                        if (cant >= num_labels) {
                             Labels labelObj = new Labels(id, label, cant);
                             labels.add(labelObj);
                             id++;

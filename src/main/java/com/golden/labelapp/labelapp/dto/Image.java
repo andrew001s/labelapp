@@ -2,7 +2,6 @@ package com.golden.labelapp.labelapp.dto;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 @Document(collection = "images")
 public class Image {

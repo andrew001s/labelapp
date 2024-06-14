@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.golden.labelapp.labelapp.dto.DatasetRequest;
+import com.golden.labelapp.labelapp.dto.Image;
 
 /**
  * Esta interfaz define los servicios relacionados con los conjuntos de datos.
@@ -40,5 +41,5 @@ public interface DatasetServices {
      * @param keys las claves a utilizar
      * @return un mapa que contiene la configuración YAML generada
      */
-    Map<String, Object> generate_config_yaml(List<String> names, Map<Integer, String> keys);
+    Map<String, Object> generate_config_yaml(List<String> names, Map<Integer, String> keys, List<Image> annotations);
 }

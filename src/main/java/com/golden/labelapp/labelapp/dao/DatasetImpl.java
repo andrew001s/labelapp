@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.golden.labelapp.labelapp.dto.DatasetRequest;
+import com.golden.labelapp.labelapp.dto.Image;
 import com.golden.labelapp.labelapp.dto.ObjectDetect;
 import com.golden.labelapp.labelapp.dto.Test;
 import com.golden.labelapp.labelapp.dto.Train;
@@ -202,16 +203,20 @@ public class DatasetImpl implements DatasetServices {
      * @return Un mapa de configuración YAML.
      */
     @Override
-    public Map<String, Object> generate_config_yaml(List<String> names, Map<Integer, String> keys) {
-        // Crear un LinkedHashMap para preservar el orden de inserción
-        Map<String, Object> configYaml = new LinkedHashMap<>();
-        configYaml.put("path", "Agregar aquí la ruta Absoluta de la carpeta del dataset");
-        configYaml.put("train", "train");
-        configYaml.put("val", "validation");
-        configYaml.put("test", "test");
-        configYaml.put("nc", keys.size());
-        configYaml.put("names", keys);
-        return configYaml;
+    public Map<String, Object> generate_config_yaml(List<String> names, Map<Integer, String> keys, List<Image> annotations) {
+        if (names.size()==annotations.size()){
+            Map<String, Object> configYaml = new LinkedHashMap<>();
+            configYaml.put("path", "Agregar aquí la ruta Absoluta de la carpeta del dataset");
+            configYaml.put("train", "train");
+            configYaml.put("val", "validation");
+            configYaml.put("test", "test");
+            configYaml.put("nc", keys.size());
+            configYaml.put("names", keys);
+            return configYaml;}
+        else{
+            
+            throw new IllegalArgumentException("La cantidad de imagenes y anotaciones no coincide");
+        }
     }
         
 }

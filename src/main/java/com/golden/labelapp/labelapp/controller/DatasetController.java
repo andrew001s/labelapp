@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -28,10 +30,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golden.labelapp.labelapp.dto.DatasetRequest;
+import com.golden.labelapp.labelapp.dto.Image;
+import com.golden.labelapp.labelapp.dto.Labels;
 import com.golden.labelapp.labelapp.dto.ObjectDetect;
 import com.golden.labelapp.labelapp.dto.YoloV5;
 import com.golden.labelapp.labelapp.services.DatasetServices;
+import com.golden.labelapp.labelapp.services.ImageServices;
+import com.golden.labelapp.labelapp.services.LabelServices;
 import com.golden.labelapp.labelapp.services.YoloV5Service;
 
 /**
@@ -43,7 +50,10 @@ public class DatasetController {
 
     @Autowired
     private DatasetServices datasetServices;
-
+    @Autowired
+    private LabelServices labelsServices;
+    @Autowired
+    private ImageServices imageServices;
     @Autowired 
     private YoloV5Service yoloV5Impl;
     @Value("${file.upload-dir}")
@@ -58,11 +68,25 @@ public class DatasetController {
     public ResponseEntity<?> getFiles() {
         try {
             List<String> names = datasetServices.getFolder(uploadDir);
+            List<Image> annotations= imageServices.getAllImages();
+            // Crear un conjunto con los nombres de las anotaciones
+            Set<String> annotationNames = annotations.stream()
+                .map(Image::getName)
+                .collect(Collectors.toSet());
+
+            for(String n : names) {
+                // Si el nombre no está en el conjunto de anotaciones, eliminar el archivo
+                if (!annotationNames.contains(n)) {
+                    Files.deleteIfExists(Paths.get(uploadDir, n));
+                    names.remove(n);
+                }
+            }
             generateDataset(names);
-            return ResponseEntity.ok(names);
+            return ResponseEntity.ok(names);       
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
+
     }
 
     /**
@@ -103,10 +127,18 @@ public class DatasetController {
                 }
             }
 
-            List<String> names = datasetServices.getFolder("src/main/resources/images");
-            Map<String, Object> configYaml = datasetServices.generate_config_yaml(names, keys);
+            List<String> images = datasetServices.getFolder("src/main/resources/images");
+            List<Image> annotations= imageServices.getAllImages();
+            Map<String, Object> configYaml = datasetServices.generate_config_yaml(images, keys,annotations);
             writeYamlToZip(zipOut, configYaml, "config/config.yaml");
-
+            List<Labels> labelsList = labelsServices.getAllLabels();
+            Map<String, Integer> labelCounts = new HashMap<>();
+            for (Labels label : labelsList) {
+                labelCounts.put(label.getLabel(), label.getCant());
+            }
+            ObjectMapper mapper = new ObjectMapper();
+            String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(labelCounts);
+            writeStringToZip(zipOut, json, "config/detail_class.json");
             // Iterar sobre las colecciones y agregar los documentos al ZIP
             for (String collectionName : collections) {
                 List<DatasetRequest> resultList = datasetServices.convertJsonToYoloV5(collectionName);
@@ -137,6 +169,10 @@ public class DatasetController {
                 .contentLength(resource.contentLength())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
+    }
+    
+    private void writeStringToZip(ZipOutputStream zipOut, Map<String, Integer> content, String filename) throws IOException {
+        writeBytesToZip(zipOut, content.toString().getBytes(StandardCharsets.UTF_8), filename);
     }
 
     private void writeYamlToZip(ZipOutputStream zipOut, Object data, String filename) throws IOException {
