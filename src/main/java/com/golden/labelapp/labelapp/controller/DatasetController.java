@@ -171,10 +171,6 @@ public class DatasetController {
                 .body(resource);
     }
     
-    private void writeStringToZip(ZipOutputStream zipOut, Map<String, Integer> content, String filename) throws IOException {
-        writeBytesToZip(zipOut, content.toString().getBytes(StandardCharsets.UTF_8), filename);
-    }
-
     private void writeYamlToZip(ZipOutputStream zipOut, Object data, String filename) throws IOException {
         DumperOptions options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);

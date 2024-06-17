@@ -141,4 +141,21 @@ public class ImageController {
             return ResponseEntity.badRequest().body("Error: Imagen no encontrada");
         }
     }
+
+    /**
+     * Obtiene una página de imágenes paginadas.
+     * 
+     * @param page El número de página.
+     * @param size El tamaño de la página.
+     * @return ResponseEntity con la página de imágenes.
+     */
+    @Transactional(readOnly = true)
+    @GetMapping("/getImagePage")
+    public ResponseEntity<?> getPageImages(@RequestParam int page, @RequestParam int size) {
+        try {
+            return ResponseEntity.ok(imageServicesImpl.getPageImages(page, size));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
 }

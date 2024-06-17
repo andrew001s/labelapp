@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.golden.labelapp.labelapp.dto.Image;
@@ -31,11 +32,11 @@ public interface ImageServices {
     Image insertImage(Image img);
     
     /**
-     * Obtiene todas las imágenes almacenadas en la base de datos.
+     * Obtiene todas las imágenes almacenadas en la base de datos paginados.
      * 
      * @return Una lista de todas las imágenes.
      */
-    List<Image> getAllImages();
+    Page<Image> getPageImages(int page, int size);
     
     /**
      * Actualiza una imagen existente en la base de datos.
@@ -80,4 +81,6 @@ public interface ImageServices {
      * @return Un mapa con la información de la imagen subida.
      */
     Map<String, Object> uploadImage(List<MultipartFile> file, String path);
+
+    List<Image> getAllImages();
 }

@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -27,6 +30,9 @@ import com.golden.labelapp.labelapp.services.ImageServices;
 
 /**
  * Implementación de la interfaz ImageServices que proporciona métodos para el manejo de imágenes.
+ */
+/**
+ * This class implements the ImageServices interface and provides the implementation for various image-related operations.
  */
 @Service
 public class ImageServiceImpl implements ImageServices {
@@ -127,10 +133,16 @@ public class ImageServiceImpl implements ImageServices {
      * @return Una lista de todas las imágenes almacenadas.
      */
     @Override
+    public Page<Image> getPageImages(int page, int size) {
+        Pageable pageable= PageRequest.of(page, size);
+
+        return imageRepository.findAll(pageable);
+    }
+
+    @Override
     public List<Image> getAllImages() {
         return imageRepository.findAll();
     }
-
     /**
      * Obtiene una imagen por su ID.
      * 
