@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +46,8 @@ public class ImageServiceImpl implements ImageServices {
     @Autowired
     private YoloV5Impl yoloV5Impl;
 
+    @Value("${file.upload-dir}")
+    private String uploadDir;
     /**
      * Extrae la información de una imagen en formato JSON y la convierte en un mapa de datos.
      * 
@@ -87,6 +90,7 @@ public class ImageServiceImpl implements ImageServices {
             id = imageRepository.findAll().get(imageRepository.findAll().size() - 1).getId() + 1;
         }
         img.setId(id);
+        img.setRuta(uploadDir +"/"+ img.getName());
         return imageRepository.save(img);
     }
    
@@ -226,7 +230,7 @@ public class ImageServiceImpl implements ImageServices {
             update.set("height", img.getHeight());
             update.set("width", img.getWidth());
             update.set("shapes", img.getShapes());
-            
+            update.set("ruta", img.getRuta());
             Query query = Query.query(Criteria.where("_id").is(id));
             Image updatedImage = mongoTemplate.findAndModify(query, update, Image.class);
             

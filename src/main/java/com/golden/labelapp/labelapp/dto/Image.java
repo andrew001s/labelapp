@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 public class Image {
     @Id
     private int id;
+    private String ruta;
     private String name;
     private Object[] shapes;
     private int width;
@@ -45,4 +46,11 @@ public class Image {
     public void setId(int id) {
         this.id = id;
     }
+    public String getRuta() {
+        return ruta;
+    }
+    public void setRuta(String ruta) {
+        this.ruta = ruta;
+    }
+
 }
