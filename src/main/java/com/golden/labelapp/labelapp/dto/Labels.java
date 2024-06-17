@@ -2,6 +2,7 @@ package com.golden.labelapp.labelapp.dto;
 
 import java.util.List;
 
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import jakarta.persistence.Entity;
@@ -11,6 +12,7 @@ import jakarta.persistence.Id;
 public class Labels {
     @Id
     private int id;
+    @Indexed(unique = true)
     private String label;
     private int cant;
 

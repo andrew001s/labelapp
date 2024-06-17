@@ -1,5 +1,6 @@
 package com.golden.labelapp.labelapp.dto;
 
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import jakarta.persistence.Id;
@@ -7,7 +8,9 @@ import jakarta.persistence.Id;
 public class Image {
     @Id
     private int id;
+    @Indexed(unique = true)
     private String ruta;
+    @Indexed(unique = true)
     private String name;
     private Object[] shapes;
     private int width;
