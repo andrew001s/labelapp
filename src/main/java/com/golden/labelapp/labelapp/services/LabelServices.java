@@ -3,8 +3,8 @@ package com.golden.labelapp.labelapp.services;
 import java.util.List;
 import java.util.Optional;
 
-import com.golden.labelapp.labelapp.dto.DetailsDto;
-import com.golden.labelapp.labelapp.dto.Labels;
+import com.golden.labelapp.labelapp.models.dtos.DetailsDto;
+import com.golden.labelapp.labelapp.models.entities.Labels;
 
 /**
  * Esta interfaz define los métodos para acceder y manipular las etiquetas en la aplicación.

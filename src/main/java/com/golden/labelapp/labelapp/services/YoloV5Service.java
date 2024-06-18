@@ -2,8 +2,8 @@ package com.golden.labelapp.labelapp.services;
 
 import java.util.List;
 
-import com.golden.labelapp.labelapp.dto.ObjectDetect;
-import com.golden.labelapp.labelapp.dto.YoloV5;
+import com.golden.labelapp.labelapp.models.dtos.ObjectDetectDto;
+import com.golden.labelapp.labelapp.models.entities.YoloV5;
 
 public interface YoloV5Service {
     
@@ -13,7 +13,7 @@ public interface YoloV5Service {
      * @param name The name of the YoloV5 object.
      * @param yoloV5 The list of ObjectDetect to be saved.
      */
-    void saveYoloV5(String name, List<ObjectDetect> yoloV5);
+    void saveYoloV5(String name, List<ObjectDetectDto> yoloV5);
     
     /**
      * Retrieves all YoloV5 objects.

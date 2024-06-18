@@ -14,9 +14,12 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.golden.labelapp.labelapp.dto.DetailsDto;
-import com.golden.labelapp.labelapp.dto.Labels;
+import com.golden.labelapp.labelapp.models.dtos.DetailsDto;
+import com.golden.labelapp.labelapp.models.entities.Image;
+import com.golden.labelapp.labelapp.models.entities.Labels;
+import com.golden.labelapp.labelapp.repositories.ImageRespository;
 import com.golden.labelapp.labelapp.repositories.LabelsRepository;
+import com.golden.labelapp.labelapp.services.ImageServices;
 import com.golden.labelapp.labelapp.services.LabelServices;
 
 /**
@@ -27,7 +30,8 @@ import com.golden.labelapp.labelapp.services.LabelServices;
 public class LabelServicesImpl implements LabelServices {
     @Autowired
     private LabelsRepository labelsRepository;
-
+    @Autowired
+    private ImageRespository imageRespository;
     @Autowired
     private MongoTemplate mongoTemplate;
 
@@ -37,6 +41,7 @@ public class LabelServicesImpl implements LabelServices {
      * @return una lista de objetos Labels que representan todas las etiquetas
      *         existentes.
      */
+    @Transactional(readOnly = true)
     @Override
     public List<Labels> getAllLabels() {
         return (List<Labels>) labelsRepository.findAll();
@@ -48,6 +53,7 @@ public class LabelServicesImpl implements LabelServices {
      * @param labelclass la clase de la etiqueta a guardar o actualizar.
      */
     @Override
+    @Transactional
     public void saveLabel(String labelclass) {
         List<Labels> existingLabels = labelsRepository.findByLabel(labelclass);
         int id = 0;
@@ -81,6 +87,7 @@ public class LabelServicesImpl implements LabelServices {
      * @return el ID de la etiqueta si existe, de lo contrario, -1.
      */
     @Override
+    @Transactional(readOnly = true)
     public int getLabelId(String labelclass) {
         List<Labels> existingLabels = labelsRepository.findByLabel(labelclass);
         if (!existingLabels.isEmpty()) {
@@ -97,6 +104,7 @@ public class LabelServicesImpl implements LabelServices {
      * @return un objeto Labels que representa la etiqueta encontrada.
      */
     @Override
+    @Transactional(readOnly = true)
     public Labels getLabelById(int id) {
         return labelsRepository.getLabelById(id);
     }
@@ -107,6 +115,7 @@ public class LabelServicesImpl implements LabelServices {
      * @param name el nombre de la etiqueta.
      * @return un objeto Labels que representa la etiqueta encontrada.
      */
+    @Transactional(readOnly = true)
     @Override
     public Labels getLabelByName(String name) {
         return labelsRepository.getLabelByLabel(name);
@@ -153,21 +162,46 @@ public class LabelServicesImpl implements LabelServices {
      * @param id el ID de la etiqueta.
      * @return un objeto DetailsDto que contiene los detalles de la etiqueta.
      */
+    @Transactional(readOnly = true)
     @Override
     public DetailsDto getDetails(String categoria, int minNumImg) {
-        List<Labels> label = labelsRepository.getLabelByCategoria(categoria);
-        DetailsDto details = null;
-        Map<String,Integer> subcategorias=new HashMap<>();
-        Map<String,Integer> logos=new HashMap<>();
-        for (Labels l : label) {
-            subcategorias.put(l.getSubcategoria(),l.getCant());
-            if(l.isLogo()){
-                logos.put(l.getLabel(),l.getCant());
+        List<Labels> labels = labelsRepository.getLabelByCategoria(categoria);
+        Map<String, Integer> subcategorias = new HashMap<>();
+        Map<String, Integer> logos = new HashMap<>();
+        int totalImgs = 0;
+        int cantSubcat = 0;
+        int cantLogos = 0;
+        int[] ids = new int[labels.size()];
+        for (Labels label : labels) {
+            ids[labels.indexOf(label)] = label.getId();
+    
+            String subcategoria = label.getSubcategoria();
+            boolean isLogo = label.isLogo();
+    
+            cantSubcat = imageRespository.findByIdsContaing(ids[labels.indexOf(label)]).size();
+    
+            if (cantSubcat >= minNumImg && !isLogo) {
+                subcategorias.put(subcategoria, cantSubcat);
+                totalImgs += cantSubcat;
+
+            } 
+    
+            if (isLogo) {
+                cantLogos = imageRespository.findByIdsContaing(ids[labels.indexOf(label)]).size();
+                if (cantLogos >= minNumImg) {
+                    logos.put(label.getLabel(),cantLogos);
+                    totalImgs += cantLogos;
+                }
+                
             }
+           
+            
         }
-        details = new DetailsDto(categoria, subcategorias, logos);
-
-        return details;
-
+    
+        if (totalImgs < minNumImg) {
+            return null;
+        }
+    
+        return new DetailsDto(categoria,subcategorias, logos,totalImgs);
     }
 }

@@ -23,12 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.golden.labelapp.labelapp.dto.Image;
-import com.golden.labelapp.labelapp.dto.Labels;
-import com.golden.labelapp.labelapp.dto.ObjectDetect;
+import com.golden.labelapp.labelapp.models.dtos.ObjectDetectDto;
+import com.golden.labelapp.labelapp.models.entities.Image;
+import com.golden.labelapp.labelapp.models.entities.Labels;
 import com.golden.labelapp.labelapp.repositories.ImageRespository;
 import com.golden.labelapp.labelapp.services.ImageServices;
-import com.golden.labelapp.labelapp.services.LabelServices;
 
 /**
  * Implementación de la interfaz ImageServices que proporciona métodos para el manejo de imágenes.
@@ -85,6 +84,7 @@ public class ImageServiceImpl implements ImageServices {
      * @param img La imagen a insertar.
      * @return La imagen insertada.
      */
+    @Transactional
     @Override
     public Image insertImage(Image img) {
         int id=0;
@@ -139,13 +139,14 @@ public class ImageServiceImpl implements ImageServices {
      * 
      * @return Una lista de todas las imágenes almacenadas.
      */
+    @Transactional(readOnly = true)
     @Override
     public Page<Image> getPageImages(int page, int size) {
         Pageable pageable= PageRequest.of(page, size);
 
         return imageRepository.findAll(pageable);
     }
-
+    @Transactional(readOnly = true)
     @Override
     public List<Image> getAllImages() {
         return imageRepository.findAll();
@@ -182,11 +183,12 @@ public class ImageServiceImpl implements ImageServices {
      * @param name El nombre de la imagen.
      * @param labels La lista de etiquetas disponibles.
      */
-    @SuppressWarnings("unchecked")
+    @Transactional
+    @SuppressWarnings({ "unused", "unchecked" })
     @Override
     public void convertToYoloV5(Map<String, Object> info_dict, int height, int width, String name, List<Labels> labels) {
         Map<String, Object> bboxes = (Map<String, Object>) info_dict.get("bboxes");
-        List<ObjectDetect> objlist = new ArrayList<>();
+        List<ObjectDetectDto> objlist = new ArrayList<>();
       
         int i = 0;
         for (String key : bboxes.keySet()) {
@@ -206,7 +208,7 @@ public class ImageServiceImpl implements ImageServices {
 
             for (Labels label : labels) {
                 if (label.getLabel().equals(labelName)) {
-                    ObjectDetect obj = new ObjectDetect(label.getId(), retval, label.getLabel());
+                    ObjectDetectDto obj = new ObjectDetectDto(label.getId(), retval, label.getLabel());
                     objlist.add(obj);
                     i++;
                 }

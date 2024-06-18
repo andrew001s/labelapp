@@ -1,4 +1,4 @@
-package com.golden.labelapp.labelapp.dto;
+package com.golden.labelapp.labelapp.models.entities;
 
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;

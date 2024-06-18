@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.golden.labelapp.labelapp.dto.Image;
+import com.golden.labelapp.labelapp.models.entities.Image;
 import com.golden.labelapp.labelapp.services.ImageServices;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -43,7 +42,6 @@ public class ImageController {
      * @param img La imagen a insertar.
      * @return ResponseEntity con el resultado de la operación.
      */
-    @Transactional
     @PostMapping("/insert")
     public ResponseEntity<?> insertImage(@RequestBody Image img) {
         try {
@@ -58,7 +56,6 @@ public class ImageController {
      * 
      * @return ResponseEntity con la lista de imágenes.
      */
-    @Transactional(readOnly = true)
     @GetMapping("/all")
     public ResponseEntity<?> getAllImages() {
         try {
@@ -74,7 +71,6 @@ public class ImageController {
      * @param id El ID de la imagen.
      * @return ResponseEntity con la imagen encontrada.
      */
-    @Transactional(readOnly = true)
     @GetMapping("/get/{id}")
     public ResponseEntity<?> getImageById(@PathVariable int id) {
         try {
@@ -91,7 +87,6 @@ public class ImageController {
      * @return ResponseEntity con el resultado de la operación.
      */
     @DeleteMapping("/delete/{id}")
-    @Transactional
     public ResponseEntity<?> deleteImage(@PathVariable int id) {
         try {
             Optional<Image> image = imageServicesImpl.getImageById(id);
@@ -128,7 +123,6 @@ public class ImageController {
      * @param result El resultado de la validación de la imagen.
      * @return ResponseEntity con el resultado de la operación.
      */
-    @Transactional
     @PutMapping("/update/{id}")
     public ResponseEntity<?> updateImage(@PathVariable int id, @RequestBody Image img, BindingResult result) {
         if (result.hasErrors()) {
@@ -149,7 +143,6 @@ public class ImageController {
      * @param size El tamaño de la página.
      * @return ResponseEntity con la página de imágenes.
      */
-    @Transactional(readOnly = true)
     @GetMapping("/getImagePage")
     public ResponseEntity<?> getPageImages(@RequestParam int page, @RequestParam int size) {
         try {

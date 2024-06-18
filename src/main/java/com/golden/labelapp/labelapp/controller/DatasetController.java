@@ -22,7 +22,6 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,11 +30,11 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.golden.labelapp.labelapp.dto.DatasetRequest;
-import com.golden.labelapp.labelapp.dto.Image;
-import com.golden.labelapp.labelapp.dto.Labels;
-import com.golden.labelapp.labelapp.dto.ObjectDetect;
-import com.golden.labelapp.labelapp.dto.YoloV5;
+import com.golden.labelapp.labelapp.models.dtos.DatasetRequestDto;
+import com.golden.labelapp.labelapp.models.dtos.ObjectDetectDto;
+import com.golden.labelapp.labelapp.models.entities.Image;
+import com.golden.labelapp.labelapp.models.entities.Labels;
+import com.golden.labelapp.labelapp.models.entities.YoloV5;
 import com.golden.labelapp.labelapp.services.DatasetServices;
 import com.golden.labelapp.labelapp.services.ImageServices;
 import com.golden.labelapp.labelapp.services.LabelServices;
@@ -63,7 +62,6 @@ public class DatasetController {
      * Método para obtener los archivos del directorio de carga y generar el conjunto de datos.
      * @return ResponseEntity con la lista de nombres de archivos generados.
      */
-    @Transactional
     @PostMapping("path")
     public ResponseEntity<?> getFiles() {
         try {
@@ -106,7 +104,6 @@ public class DatasetController {
      * @return ResponseEntity con el archivo ZIP que contiene los documentos.
      * @throws IOException Si ocurre un error al leer los archivos o escribir en el archivo ZIP.
      */
-    @Transactional(readOnly = true)
     @GetMapping("/downloaddataset")
     public ResponseEntity<?> downloadAllDocuments() throws IOException {
         String[] collections = { "train", "test", "validation" };
@@ -117,7 +114,7 @@ public class DatasetController {
             List<YoloV5> yoloV5List = yoloV5Impl.getAllYoloV5();
             List<String> labelaux = new ArrayList<>();
             for (YoloV5 yoloV5 : yoloV5List) {
-                for (ObjectDetect objectDetect : yoloV5.getObjectdetect()) {
+                for (ObjectDetectDto objectDetect : yoloV5.getObjectdetect()) {
                     String label = objectDetect.getLabel();
                     int id = objectDetect.getIdlabel();
                     if (!labelaux.contains(label)) {
@@ -134,18 +131,25 @@ public class DatasetController {
             List<Labels> labelsList = labelsServices.getAllLabels();
             Map<String, Integer> labelCounts = new HashMap<>();
             for (Labels label : labelsList) {
-                labelCounts.put(label.getLabel(), label.getCant());
+                String labelName = label.getLabel();
+                if (labelName != null && !labelName.isEmpty()){
+
+                    labelCounts.put(label.getLabel(), label.getCant());}
+                else{
+                    labelCounts.put(label.getSubcategoria(), label.getCant());
+                
+                }
             }
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(labelCounts);
             writeStringToZip(zipOut, json, "config/detail_class.json");
             // Iterar sobre las colecciones y agregar los documentos al ZIP
             for (String collectionName : collections) {
-                List<DatasetRequest> resultList = datasetServices.convertJsonToYoloV5(collectionName);
+                List<DatasetRequestDto> resultList = datasetServices.convertJsonToYoloV5(collectionName);
                 String labelDirName = "labels/" + collectionName + "/";
                 String imageDirName = "images/" + collectionName + "/";
 
-                for (DatasetRequest docResult : resultList) {
+                for (DatasetRequestDto docResult : resultList) {
                     // Agregar el archivo de etiqueta al ZIP
                     String labelFilename = labelDirName + docResult.getName().replaceAll("\\.(jpeg|png|jpg)$", ".txt");
                     writeStringToZip(zipOut, docResult.getContent().toString(), labelFilename);

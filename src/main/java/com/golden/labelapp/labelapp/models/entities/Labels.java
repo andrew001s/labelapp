@@ -1,6 +1,5 @@
-package com.golden.labelapp.labelapp.dto;
+package com.golden.labelapp.labelapp.models.entities;
 
-import java.util.List;
 
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -49,25 +48,6 @@ public class Labels {
          this.cant = cant;
     }
 
-    public String toStringLabe(List<Labels> labels) {
-        String result = "";
-        for (Labels label : labels) {
-            result=result+"\n"+ "- " + label.getLabel();
-        }
-        return result;
-    }
-
-    @Override
-public String toString() {
-    return "Labels{" +
-            "id=" + id +
-            ", nombre='" + label + '\'' +
-            ", logo=" + isLogo +
-            ", cant=" + cant +
-            ", subcategoria='" + subcategoria + '\'' +
-            ", categoria='" + categoria + '\'' +
-            '}';
-}
     public boolean isLogo() {
         return isLogo;
     }

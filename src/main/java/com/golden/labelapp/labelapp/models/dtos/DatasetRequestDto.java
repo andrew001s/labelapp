@@ -1,9 +1,9 @@
-package com.golden.labelapp.labelapp.dto;
+package com.golden.labelapp.labelapp.models.dtos;
 
-public class DatasetRequest {
+public class DatasetRequestDto {
     private String name;
     private StringBuilder content;
-    public DatasetRequest(String name, StringBuilder content) {
+    public DatasetRequestDto(String name, StringBuilder content) {
         this.name = name;
         this.content = content;
     }

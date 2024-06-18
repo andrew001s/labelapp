@@ -8,15 +8,14 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.golden.labelapp.labelapp.dto.Image;
-import com.golden.labelapp.labelapp.dto.Labels;
-import com.golden.labelapp.labelapp.dto.YoloV5;
+import com.golden.labelapp.labelapp.models.entities.Image;
+import com.golden.labelapp.labelapp.models.entities.Labels;
+import com.golden.labelapp.labelapp.models.entities.YoloV5;
 import com.golden.labelapp.labelapp.services.ImageServices;
 import com.golden.labelapp.labelapp.services.LabelServices;
 import com.golden.labelapp.labelapp.services.YoloV5Service;
@@ -43,7 +42,6 @@ public class yolov5Controller {
      * 
      * @return una lista de objetos YOLOv5
      */
-    @Transactional(readOnly = true)
     @GetMapping("/all")
     public List<YoloV5> getAllYolov5() {
         return (List<YoloV5>) yoloV5Impl.getAllYoloV5();
@@ -54,7 +52,6 @@ public class yolov5Controller {
      * 
      * @return una respuesta HTTP indicando el resultado de la conversión
      */
-    @Transactional
     @PostMapping("/ToYoloV5")
     @SuppressWarnings("unchecked")
     public ResponseEntity<?> ToYoloV5() {

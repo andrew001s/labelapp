@@ -7,8 +7,8 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.golden.labelapp.labelapp.dto.Image;
-import com.golden.labelapp.labelapp.dto.Labels;
+import com.golden.labelapp.labelapp.models.entities.Image;
+import com.golden.labelapp.labelapp.models.entities.Labels;
 
 /**
  * Esta interfaz define los métodos para el servicio de imágenes.

@@ -13,14 +13,15 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.golden.labelapp.labelapp.dto.DatasetRequest;
-import com.golden.labelapp.labelapp.dto.Image;
-import com.golden.labelapp.labelapp.dto.ObjectDetect;
-import com.golden.labelapp.labelapp.dto.Test;
-import com.golden.labelapp.labelapp.dto.Train;
-import com.golden.labelapp.labelapp.dto.Validation;
-import com.golden.labelapp.labelapp.dto.YoloV5;
+import com.golden.labelapp.labelapp.models.dtos.DatasetRequestDto;
+import com.golden.labelapp.labelapp.models.dtos.ObjectDetectDto;
+import com.golden.labelapp.labelapp.models.entities.Image;
+import com.golden.labelapp.labelapp.models.entities.Test;
+import com.golden.labelapp.labelapp.models.entities.Train;
+import com.golden.labelapp.labelapp.models.entities.Validation;
+import com.golden.labelapp.labelapp.models.entities.YoloV5;
 import com.golden.labelapp.labelapp.repositories.TestRepository;
 import com.golden.labelapp.labelapp.repositories.TrainRepository;
 import com.golden.labelapp.labelapp.repositories.ValidationRepository;
@@ -49,6 +50,7 @@ public class DatasetImpl implements DatasetServices {
      * @return Una lista de nombres de archivos en la carpeta.
      * @throws RuntimeException Si la ruta de la carpeta no es válida o no existe.
      */
+    @Transactional(readOnly = true)
     @Override
     public List<String> getFolder(String path) {
         File folder = new File(path);
@@ -87,6 +89,7 @@ public class DatasetImpl implements DatasetServices {
      * 
      * @param name La lista de nombres de archivos.
      */
+    @Transactional
     @Override
     public void generateDataset(List<String> name) {
         double train = 0.6;
@@ -103,7 +106,7 @@ public class DatasetImpl implements DatasetServices {
         for (int i = 0; i < trainSize; i++) {
             YoloV5 yolofiletrain = yoloV5Repository.findByName(name.get(i));
             if (yolofiletrain != null) {
-                List<ObjectDetect> objectdetect = yolofiletrain.getObjectdetect();
+                List<ObjectDetectDto> objectdetect = yolofiletrain.getObjectdetect();
                 
                 Train trainfile = new Train(name.get(i), objectdetect);
                 trainRepository.save(trainfile);
@@ -113,7 +116,7 @@ public class DatasetImpl implements DatasetServices {
         for (int i = trainSize; i < trainSize + validationSize; i++) {
             YoloV5 yolofilevalidation = yoloV5Repository.findByName(name.get(i));
             if (yolofilevalidation != null) {
-                List<ObjectDetect> objectdetect = yolofilevalidation.getObjectdetect();
+                List<ObjectDetectDto> objectdetect = yolofilevalidation.getObjectdetect();
                 
                 Validation validationfile = new Validation(name.get(i), objectdetect);
                 validationRepository.save(validationfile);
@@ -123,7 +126,7 @@ public class DatasetImpl implements DatasetServices {
         for (int i = trainSize + validationSize; i < totalSize; i++) {
             YoloV5 yolofiletest = yoloV5Repository.findByName(name.get(i));
             if (yolofiletest != null) {
-                List<ObjectDetect> objectdetect = yolofiletest.getObjectdetect();
+                List<ObjectDetectDto> objectdetect = yolofiletest.getObjectdetect();
               
                 
                 Test testfile = new Test(name.get(i), objectdetect);
@@ -141,8 +144,9 @@ public class DatasetImpl implements DatasetServices {
      * @return Una lista de objetos DatasetRequest.
      * @throws IllegalArgumentException Si el nombre de la colección es inválido.
      */
+    @Transactional(readOnly = true)
     @Override
-    public List<DatasetRequest> convertJsonToYoloV5(String collectionName) {
+    public List<DatasetRequestDto> convertJsonToYoloV5(String collectionName) {
         List<?> documents;
 
         switch (collectionName.toLowerCase()) {
@@ -159,12 +163,12 @@ public class DatasetImpl implements DatasetServices {
                 throw new IllegalArgumentException("Invalid collection name: " + collectionName);
         }
 
-        List<DatasetRequest> resultList = new ArrayList<>();
+        List<DatasetRequestDto> resultList = new ArrayList<>();
         
         for (Object doc : documents) {
             StringBuilder result = new StringBuilder();
             String docName;
-            List<ObjectDetect> objectDetects;
+            List<ObjectDetectDto> objectDetects;
             
             if (doc instanceof Train) {
                 docName = ((Train) doc).getName();
@@ -179,7 +183,7 @@ public class DatasetImpl implements DatasetServices {
                 continue;
             }
 
-            for (ObjectDetect od : objectDetects) {
+            for (ObjectDetectDto od : objectDetects) {
                 result.append(od.getIdlabel()).append(" ");
                 for (Object point : od.getPoints()) {
                     String pointString = point.toString().replace("[", "")
@@ -189,7 +193,7 @@ public class DatasetImpl implements DatasetServices {
                 result.deleteCharAt(result.length() - 1);
                 result.append("\n");
             }
-            resultList.add(new DatasetRequest(docName, result));
+            resultList.add(new DatasetRequestDto(docName, result));
         }
         
         return resultList;

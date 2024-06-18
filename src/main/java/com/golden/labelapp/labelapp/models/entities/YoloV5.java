@@ -1,8 +1,10 @@
-package com.golden.labelapp.labelapp.dto;
+package com.golden.labelapp.labelapp.models.entities;
 
 import java.util.List;
 
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.golden.labelapp.labelapp.models.dtos.ObjectDetectDto;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -12,11 +14,11 @@ public class YoloV5 {
     @Id
     private String id;
     private String name;
-    private List<ObjectDetect> objectdetect;
+    private List<ObjectDetectDto> objectdetect;
 
 
 
-    public YoloV5(String name,List<ObjectDetect> objectdetect) {
+    public YoloV5(String name,List<ObjectDetectDto> objectdetect) {
         this.name = name;
         this.objectdetect = objectdetect;
     }
@@ -37,11 +39,11 @@ public class YoloV5 {
         this.name = name;
     }
 
-    public List<ObjectDetect> getObjectdetect() {
+    public List<ObjectDetectDto> getObjectdetect() {
         return objectdetect;
     }
 
-    public void setObjectdetect(List<ObjectDetect> objectdetect) {
+    public void setObjectdetect(List<ObjectDetectDto> objectdetect) {
         this.objectdetect = objectdetect;
     }
     

@@ -1,9 +1,9 @@
-package com.golden.labelapp.labelapp.dto;
+package com.golden.labelapp.labelapp.models.dtos;
 
 import java.util.List;
 
 
-public class ObjectDetect {
+public class ObjectDetectDto {
 
 
     private int idlabel;
@@ -21,7 +21,7 @@ public class ObjectDetect {
     public void setPoints(List<Object> points) {
         this.points = points;
     }
-    public ObjectDetect(int idlabel, List<Object> points, String label) {
+    public ObjectDetectDto(int idlabel, List<Object> points, String label) {
         this.label = label;
         this.idlabel = idlabel;
         this.points = points;
