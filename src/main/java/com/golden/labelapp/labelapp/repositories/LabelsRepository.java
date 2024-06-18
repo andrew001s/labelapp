@@ -10,4 +10,5 @@ public interface LabelsRepository extends MongoRepository<Labels, Integer>{
     List<Labels> findByLabel(String labelclass);
     Labels getLabelById(int id);
     Labels getLabelByLabel(String label);
+    List<Labels> getLabelByCategoria(String categoria);
 }

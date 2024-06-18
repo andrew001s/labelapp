@@ -28,6 +28,7 @@ import com.golden.labelapp.labelapp.dto.Labels;
 import com.golden.labelapp.labelapp.dto.ObjectDetect;
 import com.golden.labelapp.labelapp.repositories.ImageRespository;
 import com.golden.labelapp.labelapp.services.ImageServices;
+import com.golden.labelapp.labelapp.services.LabelServices;
 
 /**
  * Implementación de la interfaz ImageServices que proporciona métodos para el manejo de imágenes.
@@ -45,6 +46,7 @@ public class ImageServiceImpl implements ImageServices {
 
     @Autowired
     private YoloV5Impl yoloV5Impl;
+
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -91,6 +93,7 @@ public class ImageServiceImpl implements ImageServices {
         }
         img.setId(id);
         img.setRuta(uploadDir +"/"+ img.getName());
+
         return imageRepository.save(img);
     }
    
@@ -231,6 +234,7 @@ public class ImageServiceImpl implements ImageServices {
             update.set("width", img.getWidth());
             update.set("shapes", img.getShapes());
             update.set("ruta", img.getRuta());
+            update.set("ids", img.getIds());
             Query query = Query.query(Criteria.where("_id").is(id));
             Image updatedImage = mongoTemplate.findAndModify(query, update, Image.class);
             

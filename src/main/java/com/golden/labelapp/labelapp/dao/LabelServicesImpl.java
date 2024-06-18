@@ -1,6 +1,9 @@
 package com.golden.labelapp.labelapp.dao;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +14,14 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.golden.labelapp.labelapp.dto.DetailsDto;
 import com.golden.labelapp.labelapp.dto.Labels;
 import com.golden.labelapp.labelapp.repositories.LabelsRepository;
 import com.golden.labelapp.labelapp.services.LabelServices;
 
 /**
- * Implementación de la interfaz LabelServices que proporciona métodos para realizar operaciones relacionadas con las etiquetas.
+ * Implementación de la interfaz LabelServices que proporciona métodos para
+ * realizar operaciones relacionadas con las etiquetas.
  */
 @Service
 public class LabelServicesImpl implements LabelServices {
@@ -29,7 +34,8 @@ public class LabelServicesImpl implements LabelServices {
     /**
      * Obtiene todas las etiquetas existentes.
      * 
-     * @return una lista de objetos Labels que representan todas las etiquetas existentes.
+     * @return una lista de objetos Labels que representan todas las etiquetas
+     *         existentes.
      */
     @Override
     public List<Labels> getAllLabels() {
@@ -121,8 +127,9 @@ public class LabelServicesImpl implements LabelServices {
      * Actualiza una etiqueta existente.
      * 
      * @param label el objeto Labels que contiene los nuevos datos de la etiqueta.
-     * @param id el ID de la etiqueta a actualizar.
-     * @return un objeto Optional que contiene la etiqueta actualizada si existe, de lo contrario, vacío.
+     * @param id    el ID de la etiqueta a actualizar.
+     * @return un objeto Optional que contiene la etiqueta actualizada si existe, de
+     *         lo contrario, vacío.
      */
     @Override
     @Transactional
@@ -138,5 +145,29 @@ public class LabelServicesImpl implements LabelServices {
         } else {
             return Optional.empty();
         }
+    }
+
+    /**
+     * Obtiene los detalles de una etiqueta por su ID.
+     * 
+     * @param id el ID de la etiqueta.
+     * @return un objeto DetailsDto que contiene los detalles de la etiqueta.
+     */
+    @Override
+    public DetailsDto getDetails(String categoria, int minNumImg) {
+        List<Labels> label = labelsRepository.getLabelByCategoria(categoria);
+        DetailsDto details = null;
+        Map<String,Integer> subcategorias=new HashMap<>();
+        Map<String,Integer> logos=new HashMap<>();
+        for (Labels l : label) {
+            subcategorias.put(l.getSubcategoria(),l.getCant());
+            if(l.isLogo()){
+                logos.put(l.getLabel(),l.getCant());
+            }
+        }
+        details = new DetailsDto(categoria, subcategorias, logos);
+
+        return details;
+
     }
 }

@@ -15,7 +15,9 @@ public class Labels {
     @Indexed(unique = true)
     private String label;
     private int cant;
-
+    private boolean isLogo;
+    private String categoria;
+    private String subcategoria;
     public Labels(int id, String label, int cant) {
         this.id = id;
         this.label = label;
@@ -53,6 +55,46 @@ public class Labels {
             result=result+"\n"+ "- " + label.getLabel();
         }
         return result;
+    }
+
+    @Override
+public String toString() {
+    return "Labels{" +
+            "id=" + id +
+            ", nombre='" + label + '\'' +
+            ", logo=" + isLogo +
+            ", cant=" + cant +
+            ", subcategoria='" + subcategoria + '\'' +
+            ", categoria='" + categoria + '\'' +
+            '}';
+}
+    public boolean isLogo() {
+        return isLogo;
+    }
+
+
+    public void setLogo(boolean isLogo) {
+        this.isLogo = isLogo;
+    }
+
+
+    public String getSubcategoria() {
+        return subcategoria;
+    }
+
+
+    public void setSubcategoria(String subcategoria) {
+        this.subcategoria = subcategoria;
+    }
+
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
     }
     
 }

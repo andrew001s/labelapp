@@ -19,6 +19,8 @@ import com.golden.labelapp.labelapp.services.LabelServices;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 
@@ -130,4 +132,14 @@ public class LabelController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
+
+    @GetMapping("/getDetails")
+    public ResponseEntity<?> getDetails(@RequestParam String categoria, @RequestParam int minNumImg) {
+       try {
+           return ResponseEntity.ok(labelServicesImpl.getDetails(categoria, minNumImg));
+       } catch (Exception e) {
+           return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+       }
+    }
+    
 }

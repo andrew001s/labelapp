@@ -10,11 +10,19 @@ public class Image {
     private int id;
     @Indexed(unique = true)
     private String ruta;
+    private int[] ids;
     @Indexed(unique = true)
     private String name;
     private Object[] shapes;
     private int width;
     private int height;
+    public int[] getIds() {
+        return ids;
+    }
+    public void setIds(int[] ids) {
+        this.ids = ids;
+    }
+
     
     public String getName() {
         return name;
