@@ -1,5 +1,8 @@
 package com.golden.labelapp.labelapp.models.entities;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -16,6 +19,21 @@ public class Image {
     private Object[] shapes;
     private int width;
     private int height;
+    private Date createdAt;
+    private LocalDateTime updatedAt;
+    
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
     public int[] getIds() {
         return ids;
     }

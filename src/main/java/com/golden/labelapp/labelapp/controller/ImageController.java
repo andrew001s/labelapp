@@ -1,5 +1,9 @@
 package com.golden.labelapp.labelapp.controller;
 
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -151,4 +155,25 @@ public class ImageController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
+
+    @GetMapping("/getByCreated")
+    public List<Image> getByCreated(@RequestParam String startDate, @RequestParam String endDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+        startDate= startDate.replace(" ", "+");
+        endDate= endDate.replace(" ", "+");
+        ZonedDateTime start = ZonedDateTime.parse(startDate, formatter);
+        ZonedDateTime end = ZonedDateTime.parse(endDate, formatter);
+        return imageServicesImpl.getImageByCreatedDate(Date.from(start.toInstant()), Date.from(end.toInstant()));
+    }
+
+    @GetMapping("/getByUpdated")
+    public List<Image> getByUpdated(@RequestParam String startDate, @RequestParam String endDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+        startDate= startDate.replace(" ", "+");
+        endDate= endDate.replace(" ", "+");
+        ZonedDateTime start = ZonedDateTime.parse(startDate, formatter);
+        ZonedDateTime end = ZonedDateTime.parse(endDate, formatter);
+        return imageServicesImpl.getImageByUpdatedDate(Date.from(start.toInstant()), Date.from(end.toInstant()));
+    }
+    
 }

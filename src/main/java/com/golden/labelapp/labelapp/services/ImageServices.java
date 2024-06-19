@@ -1,5 +1,8 @@
 package com.golden.labelapp.labelapp.services;
 
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -83,4 +86,7 @@ public interface ImageServices {
     Map<String, Object> uploadImage(List<MultipartFile> file, String path);
 
     List<Image> getAllImages();
+
+    List<Image> getImageByCreatedDate(Date startDate, Date endDate);
+    List<Image> getImageByUpdatedDate(Date startDate, Date endDate);
 }

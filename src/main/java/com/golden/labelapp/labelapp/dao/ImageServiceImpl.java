@@ -3,7 +3,10 @@ package com.golden.labelapp.labelapp.dao;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -237,6 +240,8 @@ public class ImageServiceImpl implements ImageServices {
             update.set("shapes", img.getShapes());
             update.set("ruta", img.getRuta());
             update.set("ids", img.getIds());
+            LocalDateTime now = LocalDateTime.now();
+            update.set("updatedAt", now);
             Query query = Query.query(Criteria.where("_id").is(id));
             Image updatedImage = mongoTemplate.findAndModify(query, update, Image.class);
             
@@ -248,5 +253,17 @@ public class ImageServiceImpl implements ImageServices {
         } else {
             return Optional.empty();
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Image> getImageByCreatedDate(Date startDate, Date endDate) {
+        return imageRepository.findByCreatedAtBetween(startDate, endDate);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Image> getImageByUpdatedDate(Date startDate, Date endDate) {
+        return imageRepository.findByUpdatedAtBetween(startDate, endDate);
     }
 }
