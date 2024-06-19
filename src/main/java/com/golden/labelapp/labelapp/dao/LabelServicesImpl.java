@@ -1,6 +1,5 @@
 package com.golden.labelapp.labelapp.dao;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.golden.labelapp.labelapp.models.dtos.DetailsDto;
-import com.golden.labelapp.labelapp.models.entities.Image;
 import com.golden.labelapp.labelapp.models.entities.Labels;
 import com.golden.labelapp.labelapp.repositories.ImageRespository;
 import com.golden.labelapp.labelapp.repositories.LabelsRepository;
-import com.golden.labelapp.labelapp.services.ImageServices;
 import com.golden.labelapp.labelapp.services.LabelServices;
 
 /**
