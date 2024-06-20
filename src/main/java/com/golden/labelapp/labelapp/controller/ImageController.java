@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.golden.labelapp.labelapp.models.entities.Image;
 import com.golden.labelapp.labelapp.services.ImageServices;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  * Controlador para la gestión de imágenes.
  */
 @RestController
+@CrossOrigin(originPatterns = "*")
 @RequestMapping("/image")
 public class ImageController {
     @Autowired

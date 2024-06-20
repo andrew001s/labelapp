@@ -22,6 +22,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +45,7 @@ import com.golden.labelapp.labelapp.services.YoloV5Service;
  * Controlador para el manejo de los conjuntos de datos.
  */
 @RestController
+@CrossOrigin(originPatterns = "*")
 @RequestMapping("/dataset")
 public class DatasetController {
 

@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +25,7 @@ import com.golden.labelapp.labelapp.services.YoloV5Service;
  * Controlador para la funcionalidad relacionada con YOLOv5.
  */
 @RestController
+@CrossOrigin(originPatterns = "*")
 @RequestMapping("/yolov5")
 public class yolov5Controller {
     private int num_labels=13;
