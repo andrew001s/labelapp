@@ -1,9 +1,7 @@
 package com.golden.labelapp.labelapp.repositories;
 
 import java.util.List;
-import java.util.Optional;
 
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import com.golden.labelapp.labelapp.models.entities.Labels;
