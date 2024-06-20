@@ -88,4 +88,5 @@ public interface ImageServices {
 
     List<Image> getImageByCreatedDate(Date startDate, Date endDate);
     List<Image> getImageByUpdatedDate(Date startDate, Date endDate);
+    Optional<Image> getLastId();
 }

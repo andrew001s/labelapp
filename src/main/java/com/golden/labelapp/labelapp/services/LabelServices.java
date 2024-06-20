@@ -67,4 +67,5 @@ public interface LabelServices {
     
     DetailsDto getDetails(String categoria,int minNumImg);
 
+    Labels getLabelSubcategoria(String subcategoria);
 }

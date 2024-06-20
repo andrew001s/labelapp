@@ -67,8 +67,15 @@ public class yolov5Controller {
                 info_dict = imageServices.extractInfoFromJson(img);
                 for (Object element : img.getShapes()) {
                     String label = (String) ((Map<String, Object>) element).get("label");
+
                     if (!labels.stream().map(Labels::getLabel).collect(Collectors.toList()).contains(label)) {
-                        int cant = labelServicesImpl.getLabelByName(label).getCant();
+                        int cant =0;
+                        if (labelServicesImpl.getLabelByName(label) != null) {
+                           cant = labelServicesImpl.getLabelByName(label).getCant();
+                        } else {
+                            
+                            cant= labelServicesImpl.getLabelSubcategoria(label).getCant();
+                        }
                         if (cant >= num_labels) {
                             Labels labelObj = new Labels(id, label, cant);
                             labels.add(labelObj);

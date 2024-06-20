@@ -201,4 +201,11 @@ public class LabelServicesImpl implements LabelServices {
     
         return new DetailsDto(categoria,subcategorias, logos,totalImgs);
     }
+
+    @Override
+    public Labels getLabelSubcategoria(String subcategoria) {
+        return labelsRepository.getLabelBySubcategoria(subcategoria);
+    }
+
+
 }

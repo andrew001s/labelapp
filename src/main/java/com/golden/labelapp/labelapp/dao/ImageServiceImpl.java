@@ -38,13 +38,14 @@ import com.golden.labelapp.labelapp.services.LabelServices;
  * Implementación de la interfaz ImageServices que proporciona métodos para el manejo de imágenes.
  */
 /**
- * This class implements the ImageServices interface and provides the implementation for various image-related operations.
+ * This class implements the ImageServices interface and provides the
+ * implementation for various image-related operations.
  */
 @Service
 public class ImageServiceImpl implements ImageServices {
     @Autowired
     private MongoTemplate mongoTemplate;
-    
+
     @Autowired
     private ImageRespository imageRepository;
 
@@ -58,8 +59,10 @@ public class ImageServiceImpl implements ImageServices {
 
     @Value("${file.upload-dir}")
     private String uploadDir;
+
     /**
-     * Extrae la información de una imagen en formato JSON y la convierte en un mapa de datos.
+     * Extrae la información de una imagen en formato JSON y la convierte en un mapa
+     * de datos.
      * 
      * @param img La imagen en formato JSON.
      * @return Un mapa de datos que contiene la información extraída de la imagen.
@@ -76,14 +79,14 @@ public class ImageServiceImpl implements ImageServices {
             Map<String, Object> bbox = new HashMap<>();
             bboxes.put("bbox" + index, bbox);
             String label = (String) ((Map<String, Object>) element).get("label");
-            
+
             bbox.put("label", label);
             bbox.put("points", ((Map<String, Object>) element).get("points"));
             index++;
         }
-        
+
         info_dict.put("size", img.getSize());
-        
+
         return info_dict;
     }
 
@@ -96,7 +99,7 @@ public class ImageServiceImpl implements ImageServices {
     @Transactional
     @Override
     public Image insertImage(Image img) {
-        int id=0;
+        int id = 0;
         if (imageRepository.findAll().size() > 0) {
             id = imageRepository.findAll().get(imageRepository.findAll().size() - 1).getId() + 1;
         }
@@ -105,11 +108,11 @@ public class ImageServiceImpl implements ImageServices {
         Date date = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
         img.setCreatedAt(date);
         img.setUpdatedAt(now);
-        img.setRuta(uploadDir +"/"+ img.getName());
+        img.setRuta(uploadDir + "/" + img.getName());
 
         return imageRepository.save(img);
     }
-   
+
     /**
      * Sube una o varias imágenes al servidor.
      * 
@@ -124,7 +127,7 @@ public class ImageServiceImpl implements ImageServices {
         for (MultipartFile f : file) {
             try {
                 Path uploatdPath = Paths.get(path).toAbsolutePath().normalize();
-                if(!Files.exists(uploatdPath)){
+                if (!Files.exists(uploatdPath)) {
                     Files.createDirectories(uploatdPath);
                 }
                 String filename = f.getOriginalFilename();
@@ -155,20 +158,23 @@ public class ImageServiceImpl implements ImageServices {
     @Transactional(readOnly = true)
     @Override
     public Page<Image> getPageImages(int page, int size) {
-        Pageable pageable= PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size);
 
         return imageRepository.findAll(pageable);
     }
+
     @Transactional(readOnly = true)
     @Override
     public List<Image> getAllImages() {
         return imageRepository.findAll();
     }
+
     /**
      * Obtiene una imagen por su ID.
      * 
      * @param id El ID de la imagen.
-     * @return La imagen encontrada, o un objeto Optional vacío si no se encuentra la imagen.
+     * @return La imagen encontrada, o un objeto Optional vacío si no se encuentra
+     *         la imagen.
      */
     @Override
     @Transactional(readOnly = true)
@@ -185,25 +191,26 @@ public class ImageServiceImpl implements ImageServices {
     @Transactional
     public void deleteImage(int id) {
         Image img = imageRepository.findById(id).get();
-        int[] idLabel=img.getIds();
+        int[] idLabel = img.getIds();
         for (int i : idLabel) {
             Labels label = labelsRepository.findById(i).get();
-            label.setCant(label.getCant()-1);
+            label.setCant(label.getCant() - 1);
             labelServices.updateLabel(label, i);
         }
 
         imageRepository.deleteById(id);
 
     }
-     
+
     /**
-     * Convierte la información de una imagen en formato YOLOv5 y la guarda en la base de datos.
+     * Convierte la información de una imagen en formato YOLOv5 y la guarda en la
+     * base de datos.
      * 
      * @param info_dict El mapa de datos que contiene la información de la imagen.
-     * @param height La altura de la imagen.
-     * @param width El ancho de la imagen.
-     * @param name El nombre de la imagen.
-     * @param labels La lista de etiquetas disponibles.
+     * @param height    La altura de la imagen.
+     * @param width     El ancho de la imagen.
+     * @param name      El nombre de la imagen.
+     * @param labels    La lista de etiquetas disponibles.
      */
     @Transactional
     @SuppressWarnings({ "unused", "unchecked" })
@@ -211,41 +218,59 @@ public class ImageServiceImpl implements ImageServices {
     public void convertToYoloV5(Map<String, Object> info_dict, int height, int width, String name, List<Labels> labels) {
         Map<String, Object> bboxes = (Map<String, Object>) info_dict.get("bboxes");
         List<ObjectDetectDto> objlist = new ArrayList<>();
-      
-        int i = 0;
+    
+        // Iterar sobre las llaves del mapa de bboxes
         for (String key : bboxes.keySet()) {
             Map<String, Object> bbox = (Map<String, Object>) bboxes.get(key);
-            List<List<Double>> points = (List<List<Double>>) bbox.get("points");
+            List<List<Number>> points = (List<List<Number>>) bbox.get("points");
             List<Object> retval = new ArrayList<>();
-            for (List<Double> point : points) {
-                double x = Math.round((double) point.get(0) / width * 100000.0) / 100000.0;
-                double y = Math.round((double) point.get(1) / height * 100000.0) / 100000.0;
+    
+            // Convertir y normalizar puntos
+            for (List<Number> point : points) {
+                double xValue = point.get(0).doubleValue();
+                double yValue = point.get(1).doubleValue();
+                
+                double x = Math.round(xValue / width * 100000.0) / 100000.0;
+                double y = Math.round(yValue / height * 100000.0) / 100000.0;
+                
                 List<Double> pointList = new ArrayList<>();
                 pointList.add(x);
                 pointList.add(y);
                 retval.add(pointList);
             }
-        
-            String labelName = (String) bbox.get("label");
-
-            for (Labels label : labels) {
-                if (label.getLabel().equals(labelName)) {
-                    ObjectDetectDto obj = new ObjectDetectDto(label.getId(), retval, label.getLabel());
-                    objlist.add(obj);
-                    i++;
+    
+            // Asegurar que bbox contenga la clave "label" y que sea un String
+            if (bbox.containsKey("label") && bbox.get("label") instanceof String) {
+                String labelName = (String) bbox.get("label");
+    
+                // Buscar la etiqueta correspondiente en la lista de labels
+                boolean labelFound = false;
+                for (Labels label : labels) {
+                    if (label.getLabel().equals(labelName) && label.getCant() >= 13){
+                        ObjectDetectDto obj = new ObjectDetectDto(label.getId(), retval, label.getLabel());
+                        objlist.add(obj);
+                        labelFound = true;
+                        break; // Salir del bucle si se encuentra la etiqueta
+                    }
                 }
+
+            } else {
+                // Manejar el caso donde la etiqueta no está presente o no es un String
+                throw new IllegalArgumentException("Etiqueta no válida en bbox: " + bbox);
             }
         }
-            
-        yoloV5Impl.saveYoloV5(name,objlist);
+    
+        // Guardar los resultados convertidos
+        yoloV5Impl.saveYoloV5(name, objlist);
     }
 
     /**
      * Actualiza una imagen en la base de datos.
      * 
      * @param img La imagen actualizada.
-     * @param id El ID de la imagen a actualizar.
-     * @return La imagen actualizada, o un objeto Optional vacío si no se encuentra la imagen.
+     * @param id  El ID de la imagen a actualizar.
+     * @return La imagen actualizada, o un objeto Optional vacío si no se encuentra
+     *         la imagen.
      */
     @Override
     @Transactional
@@ -265,7 +290,7 @@ public class ImageServiceImpl implements ImageServices {
             Image updatedImage = mongoTemplate.findAndModify(query, update, Image.class);
             for (int i : img.getIds()) {
                 Labels label = labelsRepository.findById(i).get();
-                label.setCant(label.getCant()+1);
+                label.setCant(label.getCant() + 1);
                 labelsRepository.save(label);
             }
             if (updatedImage != null) {
@@ -288,5 +313,10 @@ public class ImageServiceImpl implements ImageServices {
     @Transactional(readOnly = true)
     public List<Image> getImageByUpdatedDate(Date startDate, Date endDate) {
         return imageRepository.findByUpdatedAtBetween(startDate, endDate);
+    }
+
+    @Override
+    public Optional<Image> getLastId() {
+        return imageRepository.findFirstByOrderByIdDesc();
     }
 }

@@ -2,6 +2,7 @@ package com.golden.labelapp.labelapp.controller;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.golden.config.BackBlaze;
 import com.golden.labelapp.labelapp.models.entities.Image;
 import com.golden.labelapp.labelapp.services.ImageServices;
 
@@ -27,7 +29,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-
 /**
  * Controlador para la gestión de imágenes.
  */
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @CrossOrigin(originPatterns = "*")
 @RequestMapping("/image")
 public class ImageController {
+    private static BackBlaze backBlaze;
     @Autowired
     private ImageServices imageServicesImpl;
 
@@ -114,6 +116,27 @@ public class ImageController {
     @PostMapping("/upload")
     public ResponseEntity<?> uploadImage(@RequestParam("files") List<MultipartFile> files) {
         try {
+            int id = 0;
+            if (imageServicesImpl.getAllImages().size() > 0) {
+                id = imageServicesImpl.getAllImages().get(imageServicesImpl.getAllImages().size() - 1).getId() + 1;
+            }
+            String filename = files.get(0).getOriginalFilename(); 
+            String extension = filename.substring(filename.lastIndexOf("."));
+            String url = id + "" + extension;
+            byte[] bytes = files.get(0).getBytes();
+            byte[] encoded = Base64.getEncoder().encode(bytes);
+            String encodedString = new String(encoded);
+            String base64= encodedString;
+            String jsonData="{\n" +
+                "    \"id\": \"" + id + "\",\n" +
+                "    \"url\": \"" + url + "\",\n" +
+                "    \"base64\": \"" + base64 + "\",\n" +
+                "    \"type\":\"" + backBlaze.type + "\",\n" +
+                "    \"name\": \"" + filename + "\",\n" +
+                "    \"network\": \"" + backBlaze.network + "\",\n" +
+                "    \"avatar\": \"" + backBlaze.avatar + "\",\n" +
+                "    \"scan\": \"" + backBlaze.scan + "\",\n" +
+                "}";
             return ResponseEntity.ok(imageServicesImpl.uploadImage(files, uploadDir));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
@@ -160,8 +183,8 @@ public class ImageController {
     @GetMapping("/getByCreated")
     public List<Image> getByCreated(@RequestParam String startDate, @RequestParam String endDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-        startDate= startDate.replace(" ", "+");
-        endDate= endDate.replace(" ", "+");
+        startDate = startDate.replace(" ", "+");
+        endDate = endDate.replace(" ", "+");
         ZonedDateTime start = ZonedDateTime.parse(startDate, formatter);
         ZonedDateTime end = ZonedDateTime.parse(endDate, formatter);
         return imageServicesImpl.getImageByCreatedDate(Date.from(start.toInstant()), Date.from(end.toInstant()));
@@ -170,11 +193,11 @@ public class ImageController {
     @GetMapping("/getByUpdated")
     public List<Image> getByUpdated(@RequestParam String startDate, @RequestParam String endDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-        startDate= startDate.replace(" ", "+");
-        endDate= endDate.replace(" ", "+");
+        startDate = startDate.replace(" ", "+");
+        endDate = endDate.replace(" ", "+");
         ZonedDateTime start = ZonedDateTime.parse(startDate, formatter);
         ZonedDateTime end = ZonedDateTime.parse(endDate, formatter);
         return imageServicesImpl.getImageByUpdatedDate(Date.from(start.toInstant()), Date.from(end.toInstant()));
     }
-    
+
 }
