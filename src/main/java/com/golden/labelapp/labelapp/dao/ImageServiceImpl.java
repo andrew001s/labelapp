@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ import com.golden.labelapp.labelapp.models.entities.Labels;
 import com.golden.labelapp.labelapp.repositories.ImageRespository;
 import com.golden.labelapp.labelapp.repositories.LabelsRepository;
 import com.golden.labelapp.labelapp.services.ImageServices;
+import com.golden.labelapp.labelapp.services.LabelServices;
 
 /**
  * Implementación de la interfaz ImageServices que proporciona métodos para el manejo de imágenes.
@@ -51,6 +53,8 @@ public class ImageServiceImpl implements ImageServices {
 
     @Autowired
     private LabelsRepository labelsRepository;
+    @Autowired
+    private LabelServices labelServices;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -97,6 +101,10 @@ public class ImageServiceImpl implements ImageServices {
             id = imageRepository.findAll().get(imageRepository.findAll().size() - 1).getId() + 1;
         }
         img.setId(id);
+        LocalDateTime now = LocalDateTime.now();
+        Date date = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
+        img.setCreatedAt(date);
+        img.setUpdatedAt(now);
         img.setRuta(uploadDir +"/"+ img.getName());
 
         return imageRepository.save(img);
@@ -181,7 +189,7 @@ public class ImageServiceImpl implements ImageServices {
         for (int i : idLabel) {
             Labels label = labelsRepository.findById(i).get();
             label.setCant(label.getCant()-1);
-            labelsRepository.save(label);
+            labelServices.updateLabel(label, i);
         }
 
         imageRepository.deleteById(id);
