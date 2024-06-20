@@ -29,6 +29,7 @@ import com.golden.labelapp.labelapp.models.dtos.ObjectDetectDto;
 import com.golden.labelapp.labelapp.models.entities.Image;
 import com.golden.labelapp.labelapp.models.entities.Labels;
 import com.golden.labelapp.labelapp.repositories.ImageRespository;
+import com.golden.labelapp.labelapp.repositories.LabelsRepository;
 import com.golden.labelapp.labelapp.services.ImageServices;
 
 /**
@@ -48,6 +49,8 @@ public class ImageServiceImpl implements ImageServices {
     @Autowired
     private YoloV5Impl yoloV5Impl;
 
+    @Autowired
+    private LabelsRepository labelsRepository;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -173,7 +176,16 @@ public class ImageServiceImpl implements ImageServices {
     @Override
     @Transactional
     public void deleteImage(int id) {
+        Image img = imageRepository.findById(id).get();
+        int[] idLabel=img.getIds();
+        for (int i : idLabel) {
+            Labels label = labelsRepository.findById(i).get();
+            label.setCant(label.getCant()-1);
+            labelsRepository.save(label);
+        }
+
         imageRepository.deleteById(id);
+
     }
      
     /**
@@ -243,7 +255,11 @@ public class ImageServiceImpl implements ImageServices {
             update.set("updatedAt", now);
             Query query = Query.query(Criteria.where("_id").is(id));
             Image updatedImage = mongoTemplate.findAndModify(query, update, Image.class);
-            
+            for (int i : img.getIds()) {
+                Labels label = labelsRepository.findById(i).get();
+                label.setCant(label.getCant()+1);
+                labelsRepository.save(label);
+            }
             if (updatedImage != null) {
                 return Optional.of(updatedImage);
             } else {
