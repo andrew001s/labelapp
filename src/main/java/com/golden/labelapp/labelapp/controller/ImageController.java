@@ -9,7 +9,11 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.golden.config.BackBlaze;
@@ -36,7 +41,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @CrossOrigin(originPatterns = "*")
 @RequestMapping("/image")
 public class ImageController {
-    private static BackBlaze backBlaze;
     @Autowired
     private ImageServices imageServicesImpl;
 
@@ -120,24 +124,37 @@ public class ImageController {
             if (imageServicesImpl.getAllImages().size() > 0) {
                 id = imageServicesImpl.getAllImages().get(imageServicesImpl.getAllImages().size() - 1).getId() + 1;
             }
-            String filename = files.get(0).getOriginalFilename(); 
-            String extension = filename.substring(filename.lastIndexOf("."));
-            String url = id + "" + extension;
-            byte[] bytes = files.get(0).getBytes();
-            byte[] encoded = Base64.getEncoder().encode(bytes);
-            String encodedString = new String(encoded);
-            String base64= encodedString;
-            String jsonData="{\n" +
-                "    \"id\": \"" + id + "\",\n" +
-                "    \"url\": \"" + url + "\",\n" +
-                "    \"base64\": \"" + base64 + "\",\n" +
-                "    \"type\":\"" + backBlaze.type + "\",\n" +
-                "    \"name\": \"" + filename + "\",\n" +
-                "    \"network\": \"" + backBlaze.network + "\",\n" +
-                "    \"avatar\": \"" + backBlaze.avatar + "\",\n" +
-                "    \"scan\": \"" + backBlaze.scan + "\",\n" +
-                "}";
-            return ResponseEntity.ok(imageServicesImpl.uploadImage(files, uploadDir));
+            for (MultipartFile file : files) {
+
+                String filename = file.getOriginalFilename();
+                String extension = filename.substring(filename.lastIndexOf("."));
+                String url = id + "" + extension;
+                byte[] bytes = file.getBytes();
+                byte[] encoded = Base64.getEncoder().encode(bytes);
+                String encodedString = new String(encoded);
+                String type = BackBlaze.type;
+                String network = BackBlaze.network;
+                boolean avatar = BackBlaze.avatar;
+                boolean scan = BackBlaze.scan;
+                String base64 = encodedString;
+                String jsonData = "{\n" +
+                        "    \"id\": \"" + String.valueOf(id) + "\",\n" +
+                        "    \"url\": \"" + url + "\",\n" +
+                        "    \"base64\": \"" + base64 + "\",\n" +
+                        "    \"type\":\"" + type + "\",\n" +
+                        "    \"name\": \"" + filename + "\",\n" +
+                        "    \"network\": \"" + network + "\",\n" +
+                        "    \"avatar\": \"" +avatar + "\",\n" +
+                        "    \"scan\": \"" + scan + "\"\n" +
+                        "}";
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                HttpEntity<String> entity = new HttpEntity<String>(jsonData, headers);
+                RestTemplate restTemplate = new RestTemplate();
+                restTemplate.exchange(uploadDir, HttpMethod.POST, entity,String.class);
+                
+            }
+            return ResponseEntity.ok("Imagenes subida correctamente");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }

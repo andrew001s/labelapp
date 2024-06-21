@@ -57,8 +57,7 @@ public class ImageServiceImpl implements ImageServices {
     @Autowired
     private LabelServices labelServices;
 
-    @Value("${file.upload-dir}")
-    private String uploadDir;
+    private final String ruta="https://cdn-60ld3n.socialsalert.com/object/image/";
 
     /**
      * Extrae la información de una imagen en formato JSON y la convierte en un mapa
@@ -108,7 +107,7 @@ public class ImageServiceImpl implements ImageServices {
         Date date = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
         img.setCreatedAt(date);
         img.setUpdatedAt(now);
-        img.setRuta(uploadDir + "/" + img.getName());
+        img.setRuta(ruta + "/" + img.getName());
 
         return imageRepository.save(img);
     }
