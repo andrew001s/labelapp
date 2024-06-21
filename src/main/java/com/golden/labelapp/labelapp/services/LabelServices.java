@@ -23,7 +23,7 @@ public interface LabelServices {
      * 
      * @param labelclass la clase de la etiqueta a guardar.
      */
-    void saveLabel(String labelclass);
+    void saveLabel(Labels labelclass);
     
     /**
      * Obtiene el ID de una etiqueta dado su nombre de clase.

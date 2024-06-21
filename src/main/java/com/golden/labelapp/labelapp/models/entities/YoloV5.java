@@ -14,12 +14,22 @@ public class YoloV5 {
     @Id
     private String id;
     private String name;
+    private String ruta;
+    public String getRuta() {
+        return ruta;
+    }
+
+    public void setRuta(String ruta) {
+        this.ruta = ruta;
+    }
+
     private List<ObjectDetectDto> objectdetect;
 
 
 
-    public YoloV5(String name,List<ObjectDetectDto> objectdetect) {
+    public YoloV5(String name, String ruta, List<ObjectDetectDto> objectdetect) {
         this.name = name;
+        this.ruta = ruta;
         this.objectdetect = objectdetect;
     }
 

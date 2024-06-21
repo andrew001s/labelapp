@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.golden.config.BackBlaze;
 import com.golden.labelapp.labelapp.models.entities.Image;
+import com.golden.labelapp.labelapp.models.entities.Labels;
 import com.golden.labelapp.labelapp.services.ImageServices;
+import com.golden.labelapp.labelapp.services.LabelServices;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -43,7 +46,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 public class ImageController {
     @Autowired
     private ImageServices imageServicesImpl;
-
+    @Autowired
+    private LabelServices labelServicesImpl;
     @Value("${file.upload-dir}")
     private String uploadDir;
 
@@ -56,12 +60,40 @@ public class ImageController {
     @PostMapping("/insert")
     public ResponseEntity<?> insertImage(@RequestBody Image img) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(imageServicesImpl.insertImage(img));
+            Image image = imageServicesImpl.insertImage(img);
+            saveLabel();
+            return ResponseEntity.status(HttpStatus.CREATED).body(image);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
+    
+    /**
+     * Guarda las etiquetas extraídas de las imágenes.
+     * 
+     * @return un mensaje indicando que la operación ha finalizado
+     */
+    public void saveLabel() {
+        List<Image> images = imageServicesImpl.getAllImages();
+        for (Object element : images) {
+            for (Object element2 : ((Image) element).getShapes()) {
+                @SuppressWarnings("unchecked")
+                String label = (String) ((Map<String, Object>) element2).get("label");
+                Labels Logo= labelServicesImpl.getLabelByName(label);
+                if (Logo != null) {
+                    labelServicesImpl.saveLabel(Logo);
+                    Labels SubCate= labelServicesImpl.getLabelSubcategoria(label);
+                    labelServicesImpl.saveLabel(SubCate);
+                } else {
+                    Labels SubCate= labelServicesImpl.getLabelSubcategoria(label);
+                    labelServicesImpl.saveLabel(SubCate);
+                } 
 
+            }
+        }
+      
+    }
+    
     /**
      * Obtiene todas las imágenes de la base de datos.
      * 
@@ -120,7 +152,7 @@ public class ImageController {
     @PostMapping("/upload")
     public ResponseEntity<?> uploadImage(@RequestParam("files") List<MultipartFile> files) {
         try {
-            int id = 0;
+            int id = 1;
             if (imageServicesImpl.getAllImages().size() > 0) {
                 id = imageServicesImpl.getAllImages().get(imageServicesImpl.getAllImages().size() - 1).getId() + 1;
             }

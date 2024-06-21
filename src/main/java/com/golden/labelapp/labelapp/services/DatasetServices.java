@@ -3,8 +3,9 @@ package com.golden.labelapp.labelapp.services;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
+
 import com.golden.labelapp.labelapp.models.dtos.DatasetRequestDto;
-import com.golden.labelapp.labelapp.models.entities.Image;
 
 /**
  * Esta interfaz define los servicios relacionados con los conjuntos de datos.
@@ -32,7 +33,7 @@ public interface DatasetServices {
      * @param name el nombre del archivo JSON
      * @return la lista de objetos DatasetRequest en formato YOLOv5
      */
-    List<DatasetRequestDto> convertJsonToYoloV5(String name);
+    //List<DatasetRequestDto> convertJsonToYoloV5(String name);
     
     /**
      * Genera un archivo de configuración YAML utilizando los nombres y claves especificados.
@@ -41,5 +42,7 @@ public interface DatasetServices {
      * @param keys las claves a utilizar
      * @return un mapa que contiene la configuración YAML generada
      */
-    Map<String, Object> generate_config_yaml(List<String> names, Map<Integer, String> keys, List<Image> annotations);
+    Map<String, Object> generate_config_yaml(Map<Integer, String> keys);
+
+    Page<DatasetRequestDto> getGraph(int page, int size);
 }

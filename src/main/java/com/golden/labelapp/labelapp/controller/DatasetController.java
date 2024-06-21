@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,12 +25,12 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.golden.labelapp.labelapp.models.dtos.DatasetRequestDto;
 import com.golden.labelapp.labelapp.models.dtos.ObjectDetectDto;
 import com.golden.labelapp.labelapp.models.entities.Image;
 import com.golden.labelapp.labelapp.models.entities.Labels;
@@ -108,76 +107,87 @@ public class DatasetController {
      */
     @GetMapping("/downloaddataset")
     public ResponseEntity<?> downloadAllDocuments() throws IOException {
-        String[] collections = { "train", "test", "validation" };
+        //String[] collections = { "train", "test", "validation" };
 
         ByteArrayOutputStream zipBytes = new ByteArrayOutputStream();
         try (ZipOutputStream zipOut = new ZipOutputStream(zipBytes)) {
+            // Crear un mapa para almacenar las etiquetas
             Map<Integer, String> keys = new HashMap<>();
-            List<YoloV5> yoloV5List = yoloV5Impl.getAllYoloV5();
+            List<YoloV5> yoloV5List = yoloV5Impl.getAllYoloV5List();
             List<String> labelaux = new ArrayList<>();
+            // Iterar sobre las etiquetas y agregar las claves al mapa
             for (YoloV5 yoloV5 : yoloV5List) {
-                for (ObjectDetectDto objectDetect : yoloV5.getObjectdetect()) {
-                    String label = objectDetect.getLabel();
-                    int id = objectDetect.getIdlabel();
-                    if (!labelaux.contains(label)) {
-                        keys.put(id, label);
-                        labelaux.add(label);
-                    }
+            for (ObjectDetectDto objectDetect : yoloV5.getObjectdetect()) {
+                String label = objectDetect.getLabel();
+                int id = objectDetect.getIdlabel();
+                if (!labelaux.contains(label)) {
+                keys.put(id, label);
+                labelaux.add(label);
                 }
             }
+            }
 
-            List<String> images = datasetServices.getFolder("src/main/resources/images");
-            List<Image> annotations= imageServices.getAllImages();
-            Map<String, Object> configYaml = datasetServices.generate_config_yaml(images, keys,annotations);
+            Map<String, Object> configYaml = datasetServices.generate_config_yaml(keys);
             writeYamlToZip(zipOut, configYaml, "config/config.yaml");
-            List<Labels> labelsList = labelsServices.getAllLabels();
-            Map<String, Integer> labelCounts = new HashMap<>();
-            for (Labels label : labelsList) {
-                String labelName = label.getLabel();
-                if (labelName != null && !labelName.isEmpty()){
 
-                    labelCounts.put(label.getLabel(), label.getCant());}
-                else{
-                    labelCounts.put(label.getSubcategoria(), label.getCant());
-                
-                }
+            // Obtener todas las etiquetas
+            List<Labels> labelsList = labelsServices.getAllLabels();
+            // Crear un mapa para almacenar el recuento de etiquetas
+            Map<String, Integer> labelCounts = new HashMap<>();
+            // Iterar sobre las etiquetas y agregar el recuento al mapa
+            for (Labels label : labelsList) {
+            String labelName = label.getLabel();
+            if (labelName != null && !labelName.isEmpty()){
+                labelCounts.put(label.getLabel(), label.getCant());
+            } else {
+                labelCounts.put(label.getSubcategoria(), label.getCant());
             }
+            }
+            // Convertir el mapa de recuento de etiquetas a formato JSON
             ObjectMapper mapper = new ObjectMapper();
             String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(labelCounts);
+            String jsonconfig= mapper.writerWithDefaultPrettyPrinter().writeValueAsString(configYaml);
             writeStringToZip(zipOut, json, "config/detail_class.json");
-            // Iterar sobre las colecciones y agregar los documentos al ZIP
-            for (String collectionName : collections) {
-                List<DatasetRequestDto> resultList = datasetServices.convertJsonToYoloV5(collectionName);
-                String labelDirName = "labels/" + collectionName + "/";
-                String imageDirName = "images/" + collectionName + "/";
+            writeStringToZip(zipOut, jsonconfig, "config/config.json");
 
-                for (DatasetRequestDto docResult : resultList) {
-                    // Agregar el archivo de etiqueta al ZIP
-                    String labelFilename = labelDirName + docResult.getName().replaceAll("\\.(jpeg|png|jpg)$", ".txt");
-                    writeStringToZip(zipOut, docResult.getContent().toString(), labelFilename);
+        //     // Iterar sobre las colecciones y agregar los documentos al ZIP
+        //     for (String collectionName : collections) {
+        //     // Obtener los documentos de la colección en formato DatasetRequestDto
+        //     List<DatasetRequestDto> resultList = datasetServices.convertJsonToYoloV5(collectionName);
+        //     String labelDirName = "labels/" + collectionName + "/";
+        //     String imageDirName = "images/" + collectionName + "/";
 
-                    // Agregar la imagen al ZIP si existe
-                    Path imagePath = Paths.get("src/main/resources/images", docResult.getName());
-                    if (Files.exists(imagePath)) {
-                        writeBytesToZip(zipOut, Files.readAllBytes(imagePath), imageDirName + docResult.getName());
-                    }
-                }
-            }
+        //     for (DatasetRequestDto docResult : resultList) {
+        //         // Agregar el archivo de etiqueta al ZIP
+        //         String labelFilename = labelDirName + docResult.getName().replaceAll("\\.(jpeg|png|jpg)$", ".txt");
+        //         writeStringToZip(zipOut, docResult.getContent().toString(), labelFilename);
+
+        //         // Agregar la imagen al ZIP si existe
+        //         Path imagePath = Paths.get("src/main/resources/images", docResult.getName());
+        //         if (Files.exists(imagePath)) {
+        //         writeBytesToZip(zipOut, Files.readAllBytes(imagePath), imageDirName + docResult.getName());
+        //         }
+        //     }
+        //     }
         }
 
+        // // Crear un recurso de ByteArrayResource para el archivo ZIP
         ByteArrayResource resource = new ByteArrayResource(zipBytes.toByteArray());
 
+        // Configurar las cabeceras de la respuesta HTTP
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=dataset.zip");
 
+        // Devolver la respuesta HTTP con el archivo ZIP
         return ResponseEntity.ok()
-                .headers(headers)
-                .contentLength(resource.contentLength())
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
-    }
-    
-    private void writeYamlToZip(ZipOutputStream zipOut, Object data, String filename) throws IOException {
+            .headers(headers)
+            .contentLength(resource.contentLength())
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .body(resource);
+        }
+        
+        // Método para escribir un objeto YAML en el archivo ZIP
+        private void writeYamlToZip(ZipOutputStream zipOut, Object data, String filename) throws IOException {
         DumperOptions options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         options.setPrettyFlow(false);
@@ -197,6 +207,17 @@ public class DatasetController {
         zipOut.putNextEntry(new ZipEntry(filename));
         zipOut.write(bytes);
         zipOut.closeEntry();
+    }
+
+    /**
+     * Método para obtener los gráficos de los conjuntos de datos.
+     * @param page Número de página.
+     * @param size Tamaño de la página.
+     * @return ResponseEntity con la lista de gráficos.
+     */
+    @GetMapping("/graph")
+    public ResponseEntity<?> getGraph(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(datasetServices.getGraph(page, size));
     }
 
 }

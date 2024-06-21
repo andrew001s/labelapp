@@ -63,31 +63,13 @@ public class LabelController {
     }
 
     /**
-     * Guarda las etiquetas extraídas de las imágenes.
-     * 
-     * @return un mensaje indicando que la operación ha finalizado
-     */
-    @PostMapping("/saveLabel")
-    public String saveLabel() {
-        List<Image> images = imageServices.getAllImages();
-        for (Object element : images) {
-            for (Object element2 : ((Image) element).getShapes()) {
-                @SuppressWarnings("unchecked")
-                String label = (String) ((Map<String, Object>) element2).get("label");
-                labelServicesImpl.saveLabel(label);
-            }
-        }
-        return "Finalizado";
-    }
-    
-    /**
      * Inserta una nueva etiqueta.
      * 
      * @param label la etiqueta a insertar
      * @return un mensaje indicando que la etiqueta ha sido insertada o un mensaje de error en caso de fallo
      */
     @PostMapping("/insertLabel")
-    public String insertLabel(@RequestBody String label) {
+    public String insertLabel(@RequestBody Labels label) {
         try {
             labelServicesImpl.saveLabel(label);
             return "Etiqueta insertada";

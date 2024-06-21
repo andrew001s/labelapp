@@ -17,10 +17,13 @@ public class Labels {
     private boolean isLogo;
     private String categoria;
     private String subcategoria;
-    public Labels(int id, String label, int cant) {
+    public Labels(int id, String label, int cant, boolean isLogo, String categoria, String subcategoria) {
         this.id = id;
         this.label = label;
         this.cant = cant;
+        this.isLogo = isLogo;
+        this.categoria = categoria;
+        this.subcategoria = subcategoria;
     }
 
 

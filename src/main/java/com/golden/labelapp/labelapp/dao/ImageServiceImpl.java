@@ -72,6 +72,7 @@ public class ImageServiceImpl implements ImageServices {
         Map<String, Object> info_dict = new HashMap<>();
         Map<String, Object> bboxes = new HashMap<>();
         info_dict.put("filename", img.getName());
+        info_dict.put("url", img.getRuta());
         info_dict.put("bboxes", bboxes);
         for (Object element : img.getShapes()) {
             Map<String, Object> bbox = new HashMap<>();
@@ -97,7 +98,7 @@ public class ImageServiceImpl implements ImageServices {
     @Transactional
     @Override
     public Image insertImage(Image img) {
-        int id = 0;
+        int id = 1;
         if (imageRepository.findAll().size() > 0) {
             id = imageRepository.findAll().get(imageRepository.findAll().size() - 1).getId() + 1;
         }
@@ -106,7 +107,8 @@ public class ImageServiceImpl implements ImageServices {
         Date date = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
         img.setCreatedAt(date);
         img.setUpdatedAt(now);
-        img.setRuta(ruta + "/" + img.getName());
+        img.setRuta(ruta + id);
+        
 
         return imageRepository.save(img);
     }
@@ -213,10 +215,10 @@ public class ImageServiceImpl implements ImageServices {
     @Transactional
     @SuppressWarnings({ "unused", "unchecked" })
     @Override
-    public void convertToYoloV5(Map<String, Object> info_dict, int height, int width, String name, List<Labels> labels) {
+    public void convertToYoloV5(Map<String, Object> info_dict, int height, int width, String name, List<Labels> labels,int minNumImg) {
         Map<String, Object> bboxes = (Map<String, Object>) info_dict.get("bboxes");
         List<ObjectDetectDto> objlist = new ArrayList<>();
-    
+        String ruta = (String) info_dict.get("url");
         // Iterar sobre las llaves del mapa de bboxes
         for (String key : bboxes.keySet()) {
             Map<String, Object> bbox = (Map<String, Object>) bboxes.get(key);
@@ -244,7 +246,7 @@ public class ImageServiceImpl implements ImageServices {
                 // Buscar la etiqueta correspondiente en la lista de labels
                 boolean labelFound = false;
                 for (Labels label : labels) {
-                    if (label.getLabel().equals(labelName) && label.getCant() >= 13){
+                    if (label.getLabel().equals(labelName) && label.getCant() >= minNumImg){
                         ObjectDetectDto obj = new ObjectDetectDto(label.getId(), retval, label.getLabel());
                         objlist.add(obj);
                         labelFound = true;
@@ -259,7 +261,7 @@ public class ImageServiceImpl implements ImageServices {
         }
     
         // Guardar los resultados convertidos
-        yoloV5Impl.saveYoloV5(name, objlist);
+        yoloV5Impl.saveYoloV5(name, ruta,objlist);
     }
 
     /**

@@ -73,7 +73,7 @@ public interface ImageServices {
      * @param name El nombre de la imagen.
      * @param labels Una lista de etiquetas asociadas a la imagen.
      */
-    void convertToYoloV5(Map<String, Object> info_dict, int height, int width, String name, List<Labels> labels);
+    void convertToYoloV5(Map<String, Object> info_dict, int height, int width, String name, List<Labels> labels,int num_labels);
     
     /**
      * Sube una imagen al servidor.

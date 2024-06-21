@@ -1,5 +1,6 @@
 package com.golden.labelapp.labelapp.dao;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,8 +52,34 @@ public class LabelServicesImpl implements LabelServices {
      */
     @Override
     @Transactional
-    public void saveLabel(String labelclass) {
-        List<Labels> existingLabels = labelsRepository.findByLabel(labelclass);
+    public void saveLabel(Labels labelclass) {
+        if (labelclass.isLogo()) {
+            List<Labels> existingLabels = labelsRepository.findByLabel(labelclass.getLabel());
+            int[] id= idLabel(existingLabels);
+            if (id != null) {
+                Labels newLabel = new Labels(id[0],labelclass.getLabel(), id[1],labelclass.isLogo(),  labelclass.getCategoria(),
+                        labelclass.getSubcategoria());
+                labelsRepository.save(newLabel);
+            }
+        }
+        else {
+            List<Labels> existingLabels =  new ArrayList<>();
+            if (labelsRepository.getLabelBySubcategoria(labelclass.getSubcategoria()) != null)
+            {
+                existingLabels.add(labelsRepository.getLabelBySubcategoria(labelclass.getSubcategoria()));
+            }
+            int[] id= idLabel(existingLabels);
+            if (id != null) {
+                Labels newLabel = new Labels(id[0],labelclass.getLabel(), id[1],labelclass.isLogo(),  labelclass.getCategoria(),
+                        labelclass.getSubcategoria());
+                labelsRepository.save(newLabel);
+            }
+        }
+
+    }
+
+    public int[] idLabel( List<Labels> existingLabels) {
+        
         int id = 0;
         int cant = 0;
         if (!existingLabels.isEmpty()) {
@@ -65,18 +92,17 @@ public class LabelServicesImpl implements LabelServices {
 
         } else {
 
-            cant = 1;
+            cant = 0;
             List<Labels> allLabels = labelsRepository.findAll();
             if (allLabels.isEmpty()) {
                 id = 0;
             } else {
                 id = labelsRepository.findAll().get(labelsRepository.findAll().size() - 1).getId() + 1;
             }
-            Labels newLabel = new Labels(id, labelclass, cant);
-            labelsRepository.save(newLabel);
+            return new int[] { id, cant };
         }
+        return null;
     }
-
     /**
      * Obtiene el ID de una etiqueta por su clase.
      * 
@@ -171,41 +197,39 @@ public class LabelServicesImpl implements LabelServices {
         int[] ids = new int[labels.size()];
         for (Labels label : labels) {
             ids[labels.indexOf(label)] = label.getId();
-    
+
             String subcategoria = label.getSubcategoria();
             boolean isLogo = label.isLogo();
-    
+
             cantSubcat = imageRespository.findByIdsContaing(ids[labels.indexOf(label)]).size();
-    
+
             if (cantSubcat >= minNumImg && !isLogo) {
                 subcategorias.put(subcategoria, cantSubcat);
                 totalImgs += cantSubcat;
 
-            } 
-    
+            }
+
             if (isLogo) {
                 cantLogos = imageRespository.findByIdsContaing(ids[labels.indexOf(label)]).size();
                 if (cantLogos >= minNumImg) {
-                    logos.put(label.getLabel(),cantLogos);
+                    logos.put(label.getLabel(), cantLogos);
                     totalImgs += cantLogos;
                 }
-                
+
             }
-           
-            
+
         }
-    
+
         if (totalImgs < minNumImg) {
             return null;
         }
-    
-        return new DetailsDto(categoria,subcategorias, logos,totalImgs);
+
+        return new DetailsDto(categoria, subcategorias, logos, totalImgs);
     }
 
     @Override
     public Labels getLabelSubcategoria(String subcategoria) {
         return labelsRepository.getLabelBySubcategoria(subcategoria);
     }
-
 
 }

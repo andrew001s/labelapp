@@ -7,11 +7,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.golden.labelapp.labelapp.models.entities.Image;
@@ -28,7 +30,7 @@ import com.golden.labelapp.labelapp.services.YoloV5Service;
 @CrossOrigin(originPatterns = "*")
 @RequestMapping("/yolov5")
 public class yolov5Controller {
-    private int num_labels=13;
+    
     @Autowired
     private YoloV5Service yoloV5Impl;
 
@@ -45,8 +47,8 @@ public class yolov5Controller {
      * @return una lista de objetos YOLOv5
      */
     @GetMapping("/all")
-    public List<YoloV5> getAllYolov5() {
-        return (List<YoloV5>) yoloV5Impl.getAllYoloV5();
+    public Page<YoloV5> getAllYolov5(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        return yoloV5Impl.getAllYoloV5(page, size);
     }
 
     /**
@@ -56,7 +58,7 @@ public class yolov5Controller {
      */
     @PostMapping("/ToYoloV5")
     @SuppressWarnings("unchecked")
-    public ResponseEntity<?> ToYoloV5() {
+    public ResponseEntity<?> ToYoloV5(@RequestParam(defaultValue = "13") int num_labels){
         try {
             Map<String, Object> info_dict = new HashMap<>();
             Map<String, Integer> labelToId = new HashMap<>();
@@ -77,13 +79,13 @@ public class yolov5Controller {
                             cant= labelServicesImpl.getLabelSubcategoria(label).getCant();
                         }
                         if (cant >= num_labels) {
-                            Labels labelObj = new Labels(id, label, cant);
+                            Labels labelObj = new Labels(id, label, cant, false, " ", " ");
                             labels.add(labelObj);
                             id++;
                         }
                     }
                 }
-                imageServices.convertToYoloV5(info_dict, img.getHeight(), img.getWidth(), img.getName(), labels);
+                imageServices.convertToYoloV5(info_dict, img.getHeight(), img.getWidth(), img.getName(), labels,num_labels);
                 labelToId.clear();
             }
             return ResponseEntity.ok().body("Convertido a YoloV5");

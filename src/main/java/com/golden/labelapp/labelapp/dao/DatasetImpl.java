@@ -12,12 +12,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.golden.labelapp.labelapp.models.dtos.DatasetRequestDto;
 import com.golden.labelapp.labelapp.models.dtos.ObjectDetectDto;
-import com.golden.labelapp.labelapp.models.entities.Image;
 import com.golden.labelapp.labelapp.models.entities.Test;
 import com.golden.labelapp.labelapp.models.entities.Train;
 import com.golden.labelapp.labelapp.models.entities.Validation;
@@ -85,7 +87,8 @@ public class DatasetImpl implements DatasetServices {
 
     /**
      * Genera un conjunto de datos a partir de una lista de nombres de archivos.
-     * Divide los archivos en conjuntos de entrenamiento, validación y prueba según las proporciones especificadas.
+     * Divide los archivos en conjuntos de entrenamiento, validación y prueba según
+     * las proporciones especificadas.
      * 
      * @param name La lista de nombres de archivos.
      */
@@ -107,31 +110,30 @@ public class DatasetImpl implements DatasetServices {
             YoloV5 yolofiletrain = yoloV5Repository.findByName(name.get(i));
             if (yolofiletrain != null) {
                 List<ObjectDetectDto> objectdetect = yolofiletrain.getObjectdetect();
-                
+
                 Train trainfile = new Train(name.get(i), objectdetect);
                 trainRepository.save(trainfile);
-                
+
             }
         }
         for (int i = trainSize; i < trainSize + validationSize; i++) {
             YoloV5 yolofilevalidation = yoloV5Repository.findByName(name.get(i));
             if (yolofilevalidation != null) {
                 List<ObjectDetectDto> objectdetect = yolofilevalidation.getObjectdetect();
-                
+
                 Validation validationfile = new Validation(name.get(i), objectdetect);
                 validationRepository.save(validationfile);
-                
+
             }
         }
         for (int i = trainSize + validationSize; i < totalSize; i++) {
             YoloV5 yolofiletest = yoloV5Repository.findByName(name.get(i));
             if (yolofiletest != null) {
                 List<ObjectDetectDto> objectdetect = yolofiletest.getObjectdetect();
-              
-                
+
                 Test testfile = new Test(name.get(i), objectdetect);
                 testRepository.save(testfile);
-                
+
             }
         }
 
@@ -144,87 +146,65 @@ public class DatasetImpl implements DatasetServices {
      * @return Una lista de objetos DatasetRequest.
      * @throws IllegalArgumentException Si el nombre de la colección es inválido.
      */
+
+
     @Transactional(readOnly = true)
     @Override
-    public List<DatasetRequestDto> convertJsonToYoloV5(String collectionName) {
-        List<?> documents;
-
-        switch (collectionName.toLowerCase()) {
-            case "train":
-                documents = trainRepository.findAll();
-                break;
-            case "test":
-                documents = testRepository.findAll();
-                break;
-            case "validation":
-                documents = validationRepository.findAll();
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid collection name: " + collectionName);
-        }
-
+    public Page<DatasetRequestDto> getGraph(int page, int size) {
+        List<?> documents = yoloV5Repository.findAll();
         List<DatasetRequestDto> resultList = new ArrayList<>();
         
         for (Object doc : documents) {
-            StringBuilder result = new StringBuilder();
+           
             String docName;
-            List<ObjectDetectDto> objectDetects;
+            String url;
+            ArrayList<StringBuilder> resultsobject = new ArrayList<>(); 
             
-            if (doc instanceof Train) {
-                docName = ((Train) doc).getName();
-                objectDetects = ((Train) doc).getPoints();
-            } else if (doc instanceof Test) {
-                docName = ((Test) doc).getName();
-                objectDetects = ((Test) doc).getPoints();
-            } else if (doc instanceof Validation) {
-                docName = ((Validation) doc).getName();
-                objectDetects = ((Validation) doc).getPoints();
-            } else {
-                continue;
-            }
-
+            List<ObjectDetectDto> objectDetects;
+            docName = ((YoloV5) doc).getName();
+            objectDetects = ((YoloV5) doc).getObjectdetect();
+            url = ((YoloV5) doc).getRuta();
             for (ObjectDetectDto od : objectDetects) {
+                StringBuilder result = new StringBuilder();
                 result.append(od.getIdlabel()).append(" ");
                 for (Object point : od.getPoints()) {
                     String pointString = point.toString().replace("[", "")
                             .replace("]", "").replace(",", "");
-                    result.append(pointString).append(" ");
+                    result.append(pointString);
+                
                 }
-                result.deleteCharAt(result.length() - 1);
-                result.append("\n");
+                resultsobject.add(result);
+               
             }
-            resultList.add(new DatasetRequestDto(docName, result));
+            StringBuilder[] resultArray= resultsobject.toArray(new StringBuilder[resultsobject.size()]);
+            resultList.add(new DatasetRequestDto(docName, url, resultArray));
+            
         }
-        
-        return resultList;
+
+        int start = Math.min((int) PageRequest.of(page, size).getOffset(), resultList.size());
+        int end = Math.min((start + PageRequest.of(page, size).getPageSize()), resultList.size());
+        return new PageImpl<>(resultList.subList(start, end), PageRequest.of(page, size), resultList.size());
     }
 
     /**
-     * Genera un mapa de configuración YAML para YOLOv5 a partir de una lista de nombres y un mapa de labels.
+     * Genera un mapa de configuración YAML para YOLOv5 a partir de una lista de
+     * nombres y un mapa de labels.
      * 
-     * @param names La lista de nombres.
      * @param keys El mapa de labels.
      * @return Un mapa de configuración YAML.
      */
     @Override
-    public Map<String, Object> generate_config_yaml(List<String> names, Map<Integer, String> keys, List<Image> annotations) {
-        if (names.size()==annotations.size()){
-            Map<String, Object> configYaml = new LinkedHashMap<>();
-            configYaml.put("path", "Agregar aquí la ruta Absoluta de la carpeta del dataset");
-            configYaml.put("train", "train");
-            configYaml.put("val", "validation");
-            configYaml.put("test", "test");
-            configYaml.put("nc", keys.size());
-            configYaml.put("names", keys);
-            return configYaml;}
-        else{
-            
-            throw new IllegalArgumentException("La cantidad de imagenes y anotaciones no coincide");
-        }
+    public Map<String, Object> generate_config_yaml(Map<Integer, String> keys) {
+
+        Map<String, Object> configYaml = new LinkedHashMap<>();
+        configYaml.put("path", "Agregar aquí la ruta Absoluta de la carpeta del dataset");
+        configYaml.put("train", "train");
+        configYaml.put("val", "validation");
+        configYaml.put("test", "test");
+        configYaml.put("nc", keys.size());
+        configYaml.put("names", keys);
+        return configYaml;
+
     }
-        
+
 }
-
-
-
-
