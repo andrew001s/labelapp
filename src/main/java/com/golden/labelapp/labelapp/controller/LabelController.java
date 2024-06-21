@@ -1,7 +1,7 @@
 package com.golden.labelapp.labelapp.controller;
 
 import java.util.List;
-import java.util.Map;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.golden.labelapp.labelapp.models.dtos.DetailsDto;
-import com.golden.labelapp.labelapp.models.entities.Image;
 import com.golden.labelapp.labelapp.models.entities.Labels;
-import com.golden.labelapp.labelapp.services.ImageServices;
 import com.golden.labelapp.labelapp.services.LabelServices;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,8 +36,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class LabelController {
     @Autowired
     private LabelServices labelServicesImpl;
-    @Autowired
-    private ImageServices imageServices;
 
     /**
      * Obtiene todas las etiquetas.
