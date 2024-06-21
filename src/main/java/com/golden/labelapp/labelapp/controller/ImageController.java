@@ -127,7 +127,10 @@ public class ImageController {
             for (MultipartFile file : files) {
 
                 String filename = file.getOriginalFilename();
-                String extension = filename.substring(filename.lastIndexOf("."));
+                String extension = "";
+                if (filename != null) {
+                    extension = filename.substring(filename.lastIndexOf("."));
+                }
                 String url = id + "" + extension;
                 byte[] bytes = file.getBytes();
                 byte[] encoded = Base64.getEncoder().encode(bytes);
