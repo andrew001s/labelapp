@@ -210,11 +210,13 @@ public class DatasetController {
     }
 
     /**
-     * Método para obtener los gráficos de los conjuntos de datos.
-     * @param page Número de página.
-     * @param size Tamaño de la página.
-     * @return ResponseEntity con la lista de gráficos.
-     */
+        * Obtiene el gráfico del conjunto de datos.
+        * 
+        * @param page el número de página a obtener (por defecto: 0) (cambiar este valor para cambiar de página)
+        * @param size el tamaño de la página a obtener (por defecto: 10) 
+        * (cambiar este valor para cambiar el tamaño de elementos por página)
+        * @return ResponseEntity con el gráfico del conjunto de datos
+        */
     @GetMapping("/graph")
     public ResponseEntity<?> getGraph(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(datasetServices.getGraph(page, size));
