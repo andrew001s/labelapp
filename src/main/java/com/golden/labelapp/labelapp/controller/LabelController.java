@@ -19,14 +19,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-
-
-
-
-
-
-
 /**
  * Esta clase es el controlador para las operaciones relacionadas con las etiquetas.
  */
@@ -106,7 +98,13 @@ public class LabelController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
-
+    /**
+     * Obtiene los detalles de una etiqueta.
+     * 
+     * @param categoria la categoria de la etiqueta
+     * @param minNumImg el numero minimo de imagenes
+     * @return los detalles de la etiqueta
+     */
     @GetMapping("/getDetails")
      public ResponseEntity<?> getDetails(@RequestParam String categoria, @RequestParam int minNumImg) {
         try {

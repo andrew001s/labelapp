@@ -44,5 +44,13 @@ public interface DatasetServices {
      */
     Map<String, Object> generate_config_yaml(Map<Integer, String> keys);
 
+    /**
+     * Obtiene una lista de nombres de archivos en una carpeta dada.
+     * 
+     * @param page El número de página.
+     * @param size El tamaño de la página.
+     * @return Pagina de DatasetRequestDto que contiene las imagenes y sus bboxes 
+     * @throws RuntimeException Si la ruta de la carpeta no es válida o no existe.
+     */
     Page<DatasetRequestDto> getGraph(int page, int size);
 }

@@ -142,7 +142,8 @@ public class DatasetImpl implements DatasetServices {
     /**
      * Convierte los documentos de una colección dada en objetos DatasetRequest.
      * 
-     * @param collectionName El nombre de la colección.
+     * @param page El número de página.
+     * @param size El tamaño de la página.
      * @return Una lista de objetos DatasetRequest.
      * @throws IllegalArgumentException Si el nombre de la colección es inválido.
      */
@@ -151,22 +152,25 @@ public class DatasetImpl implements DatasetServices {
     @Transactional(readOnly = true)
     @Override
     public Page<DatasetRequestDto> getGraph(int page, int size) {
+        // Se obtienen los documentos de la colección
         List<?> documents = yoloV5Repository.findAll();
         List<DatasetRequestDto> resultList = new ArrayList<>();
-        
+        // Se recorren los documentos
         for (Object doc : documents) {
            
             String docName;
             String url;
             ArrayList<StringBuilder> resultsobject = new ArrayList<>(); 
-            
+            // Se extraen los datos de los documentos
             List<ObjectDetectDto> objectDetects;
             docName = ((YoloV5) doc).getName();
             objectDetects = ((YoloV5) doc).getObjectdetect();
             url = ((YoloV5) doc).getRuta();
+            // Se recorren los objetos detectados
             for (ObjectDetectDto od : objectDetects) {
                 StringBuilder result = new StringBuilder();
                 result.append(od.getIdlabel()).append(" ");
+                // Se recorren los puntos de los objetos detectados
                 for (Object point : od.getPoints()) {
                     String pointString = point.toString().replace("[", "")
                             .replace("]", "").replace(",", "");
@@ -176,11 +180,12 @@ public class DatasetImpl implements DatasetServices {
                 resultsobject.add(result);
                
             }
+            // Se añaden los resultados a la lista
             StringBuilder[] resultArray= resultsobject.toArray(new StringBuilder[resultsobject.size()]);
             resultList.add(new DatasetRequestDto(docName, url, resultArray));
             
         }
-
+        // Se devuelve la lista paginada
         int start = Math.min((int) PageRequest.of(page, size).getOffset(), resultList.size());
         int end = Math.min((start + PageRequest.of(page, size).getPageSize()), resultList.size());
         return new PageImpl<>(resultList.subList(start, end), PageRequest.of(page, size), resultList.size());

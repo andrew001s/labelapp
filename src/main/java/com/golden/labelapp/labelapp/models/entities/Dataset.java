@@ -23,6 +23,12 @@ public class Dataset {
     public void setPoints(List<ObjectDetectDto> objectdetect) {
         this.objectdetect = objectdetect;
     }
+    /**
+     * Constructor de la clase Dataset.
+     * 
+     * @param name el nombre del la imagen
+     * @param objectdetect los objetos detectados
+     */
     public Dataset(String name, List<ObjectDetectDto> objectdetect) {
         this.name = name;
         this.objectdetect = (List<ObjectDetectDto>) objectdetect;

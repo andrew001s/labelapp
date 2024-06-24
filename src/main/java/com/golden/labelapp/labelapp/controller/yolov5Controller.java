@@ -53,31 +53,39 @@ public class yolov5Controller {
 
     /**
      * Convierte las imágenes y sus etiquetas al formato YOLOv5.
-     * 
+     * @param num_labels el número mínimo de etiquetas que debe tener una imagen (Modificado para cambiar el numero requerido de etiquetas)
      * @return una respuesta HTTP indicando el resultado de la conversión
      */
     @PostMapping("/ToYoloV5")
     @SuppressWarnings("unchecked")
     public ResponseEntity<?> ToYoloV5(@RequestParam(defaultValue = "13") int num_labels){
         try {
+            // Se crea un diccionario para almacenar la información de las imágenes
             Map<String, Object> info_dict = new HashMap<>();
+            // Se crea un diccionario para almacenar las etiquetas y sus IDs
             Map<String, Integer> labelToId = new HashMap<>();
             List<Labels> labels = new ArrayList<>();
             List<Image> images = imageServices.getAllImages();
             int id = 0;
+            // Se recorren las imágenes
             for (Image img : images) {
+                // Se extrae la información de la imagen
                 info_dict = imageServices.extractInfoFromJson(img);
+                // Se recorren los elementos de la imagen
                 for (Object element : img.getShapes()) {
+                    // Se extrae la etiqueta del elemento
                     String label = (String) ((Map<String, Object>) element).get("label");
-
+                    // Se verifica si la etiqueta ya ha sido añadida
                     if (!labels.stream().map(Labels::getLabel).collect(Collectors.toList()).contains(label)) {
                         int cant =0;
+                        // Se verifica si la etiqueta ya existe en la base de datos
                         if (labelServicesImpl.getLabelByName(label) != null) {
                            cant = labelServicesImpl.getLabelByName(label).getCant();
                         } else {
                             
                             cant= labelServicesImpl.getLabelSubcategoria(label).getCant();
                         }
+                        // Se verifica si la cantidad de etiquetas es mayor o igual al número minimo de etiquetas solicitadas
                         if (cant >= num_labels) {
                             Labels labelObj = new Labels(id, label, cant, false, " ", " ");
                             labels.add(labelObj);
@@ -85,6 +93,7 @@ public class yolov5Controller {
                         }
                     }
                 }
+                // Se convierte la imagen al formato YOLOv5
                 imageServices.convertToYoloV5(info_dict, img.getHeight(), img.getWidth(), img.getName(), labels,num_labels);
                 labelToId.clear();
             }

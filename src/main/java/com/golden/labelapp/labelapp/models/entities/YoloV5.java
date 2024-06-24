@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 @Entity
 @Document(collection = "yolov5")
+/**Clase que representa a un archivo YoloV5  */
 public class YoloV5 {
     @Id
     private String id;

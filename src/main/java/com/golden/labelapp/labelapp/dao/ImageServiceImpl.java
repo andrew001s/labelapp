@@ -69,11 +69,14 @@ public class ImageServiceImpl implements ImageServices {
     @Override
     public Map<String, Object> extractInfoFromJson(Image img) {
         int index = 0;
+        // Crear un diccionario para almacenar la información de la imagen
         Map<String, Object> info_dict = new HashMap<>();
+        // Crear un diccionario para almacenar las bounding boxes
         Map<String, Object> bboxes = new HashMap<>();
         info_dict.put("filename", img.getName());
         info_dict.put("url", img.getRuta());
         info_dict.put("bboxes", bboxes);
+        // Iterar sobre las formas de la imagen
         for (Object element : img.getShapes()) {
             Map<String, Object> bbox = new HashMap<>();
             bboxes.put("bbox" + index, bbox);
@@ -124,15 +127,19 @@ public class ImageServiceImpl implements ImageServices {
     @SuppressWarnings("null")
     public Map<String, Object> uploadImage(List<MultipartFile> file, String path) {
         List<Map<String, Object>> responses = new ArrayList<>();
+        // Iterar sobre las imágenes
         for (MultipartFile f : file) {
             try {
+                // Crear la ruta de la imagen
                 Path uploatdPath = Paths.get(path).toAbsolutePath().normalize();
                 if (!Files.exists(uploatdPath)) {
                     Files.createDirectories(uploatdPath);
                 }
+                // Guardar la imagen
                 String filename = f.getOriginalFilename();
                 Path filepath = uploatdPath.resolve(filename);
                 Files.write(filepath, f.getBytes());
+                // Crear la URL de descarga de la imagen
                 String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/download/")
                         .path(filename).toUriString();
                 Map<String, Object> res = new HashMap<>();
@@ -163,6 +170,11 @@ public class ImageServiceImpl implements ImageServices {
         return imageRepository.findAll(pageable);
     }
 
+    /**
+     * Obtiene todas las imágenes almacenadas en la base de datos.
+     * 
+     * @return Una lista de todas las imágenes almacenadas.
+     */
     @Transactional(readOnly = true)
     @Override
     public List<Image> getAllImages() {
@@ -276,7 +288,9 @@ public class ImageServiceImpl implements ImageServices {
     @Transactional
     public Optional<Image> updateImage(Image img, int id) {
         Optional<Image> image = imageRepository.findById(id);
+        // Verificar si la imagen existe
         if (image.isPresent()) {
+            // Actualizar la imagen
             Update update = new Update();
             update.set("name", img.getName());
             update.set("height", img.getHeight());
@@ -288,11 +302,13 @@ public class ImageServiceImpl implements ImageServices {
             update.set("updatedAt", now);
             Query query = Query.query(Criteria.where("_id").is(id));
             Image updatedImage = mongoTemplate.findAndModify(query, update, Image.class);
+            // Actualizar las etiquetas
             for (int i : img.getIds()) {
                 Labels label = labelsRepository.findById(i).get();
                 label.setCant(label.getCant() + 1);
                 labelsRepository.save(label);
             }
+            // Verificar si la imagen fue actualizada
             if (updatedImage != null) {
                 return Optional.of(updatedImage);
             } else {
@@ -303,18 +319,40 @@ public class ImageServiceImpl implements ImageServices {
         }
     }
 
+    /**
+     * Obtiene una imagen por su nombre.
+     * 
+     * @param startDate La fecha de inicio.
+     * @param endDate   La fecha de fin.
+     * @return La imagen encontrada, o un objeto Optional vacío si no se encuentra
+     *         la imagen.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<Image> getImageByCreatedDate(Date startDate, Date endDate) {
         return imageRepository.findByCreatedAtBetween(startDate, endDate);
     }
 
+    /**
+     * Obtiene una imagen por su fecha de actualización.
+     * 
+     * @param startDate La fecha de inicio.
+     * @param endDate   La fecha de fin.
+     * @return La imagen encontrada, o un objeto Optional vacío si no se encuentra
+     *         la imagen.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<Image> getImageByUpdatedDate(Date startDate, Date endDate) {
         return imageRepository.findByUpdatedAtBetween(startDate, endDate);
     }
 
+    /**
+     * Obtiene la última imagen almacenada en la base de datos.
+     * 
+     * @return La última imagen almacenada, o un objeto Optional vacío si no hay
+     *         imágenes almacenadas.
+     */
     @Override
     public Optional<Image> getLastId() {
         return imageRepository.findFirstByOrderByIdDesc();

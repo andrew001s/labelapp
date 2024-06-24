@@ -2,7 +2,9 @@ package com.golden.labelapp.labelapp.models.dtos;
 
 import java.util.List;
 
-
+/**
+ * Clase que representa un objeto detectado.
+ */
 public class ObjectDetectDto {
 
 
@@ -21,6 +23,13 @@ public class ObjectDetectDto {
     public void setPoints(List<Object> points) {
         this.points = points;
     }
+    /**
+     * Constructor de la clase ObjectDetectDto.
+     * 
+     * @param idlabel el ID de la etiqueta
+     * @param points los puntos del objeto detectado
+     * @param label la etiqueta del objeto detectado
+     */
     public ObjectDetectDto(int idlabel, List<Object> points, String label) {
         this.label = label;
         this.idlabel = idlabel;

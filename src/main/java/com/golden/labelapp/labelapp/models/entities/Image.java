@@ -7,6 +7,10 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import jakarta.persistence.Id;
+
+/**
+ * Clase que representa una imagen.
+ */
 @Document(collection = "images")
 public class Image {
     @Id

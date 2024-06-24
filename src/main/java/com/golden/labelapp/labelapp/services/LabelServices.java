@@ -65,7 +65,20 @@ public interface LabelServices {
      */
     Optional<Labels> updateLabel(Labels label, int id);
     
+    /**
+     * Obtiene una lista de etiquetas que pertenecen a la categoría especificada.
+     * 
+     * @param categoria la categoría de etiqueta a buscar.
+     * @param minNumImg el número mínimo de imágenes que debe tener la etiqueta.
+     * @return una lista de etiquetas que pertenecen a la categoría especificada.
+     */
     DetailsDto getDetails(String categoria,int minNumImg);
 
+    /**
+     * Obtiene una etiqueta con la subcategoría especificada.
+     * 
+     * @param subcategoria la subcategoría de etiqueta a buscar.
+     * @return un objeto Labels que representa la etiqueta.
+     */
     Labels getLabelSubcategoria(String subcategoria);
 }

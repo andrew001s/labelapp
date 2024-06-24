@@ -153,20 +153,25 @@ public class ImageController {
     public ResponseEntity<?> uploadImage(@RequestParam("files") List<MultipartFile> files) {
         try {
             int id = 1;
+            //obtiene el id de la ultima imagen
             if (imageServicesImpl.getAllImages().size() > 0) {
                 id = imageServicesImpl.getAllImages().get(imageServicesImpl.getAllImages().size() - 1).getId() + 1;
             }
+            // Itera sobre la lista de archivos
             for (MultipartFile file : files) {
-
+                // Obtiene la extensión del archivo
                 String filename = file.getOriginalFilename();
                 String extension = "";
                 if (filename != null) {
                     extension = filename.substring(filename.lastIndexOf("."));
                 }
+                // Crea la URL de la imagen
                 String url = id + "" + extension;
+                // Convierte el archivo a base64
                 byte[] bytes = file.getBytes();
                 byte[] encoded = Base64.getEncoder().encode(bytes);
                 String encodedString = new String(encoded);
+                // Crea el JSON con los datos de la imagen
                 String type = BackBlaze.type;
                 String network = BackBlaze.network;
                 boolean avatar = BackBlaze.avatar;
@@ -182,6 +187,7 @@ public class ImageController {
                         "    \"avatar\": \"" +avatar + "\",\n" +
                         "    \"scan\": \"" + scan + "\"\n" +
                         "}";
+                // Sube la imagen al servidor
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
                 HttpEntity<String> entity = new HttpEntity<String>(jsonData, headers);
@@ -231,7 +237,13 @@ public class ImageController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
-
+    /**
+     * Obtiene las imagenes filtrado por fecha de creación.
+     * 
+     * @param startDate La fecha de inicio. 
+     * @param endDate La fecha de fin.
+     * @return Lista de imagenes filtradas por fecha.
+     */
     @GetMapping("/getByCreated")
     public List<Image> getByCreated(@RequestParam String startDate, @RequestParam String endDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
@@ -242,6 +254,13 @@ public class ImageController {
         return imageServicesImpl.getImageByCreatedDate(Date.from(start.toInstant()), Date.from(end.toInstant()));
     }
 
+    /**
+     * Obtiene las imagenes filtrado por fechas de actualización.
+     * 
+     * @param startDate La fecha de inicio. 
+     * @param endDate La fecha de fin.
+     * @return Lista de imagenes filtradas por fecha de actualización.
+     */
     @GetMapping("/getByUpdated")
     public List<Image> getByUpdated(@RequestParam String startDate, @RequestParam String endDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;

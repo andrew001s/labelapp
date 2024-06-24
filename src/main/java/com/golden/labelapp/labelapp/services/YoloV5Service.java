@@ -19,7 +19,8 @@ public interface YoloV5Service {
     
     /**
      * Retrieves all YoloV5 objects.
-     * 
+     * @param page es numero de la pagina
+     * @param size es el tamaño de la pagina
      * @return A list of all YoloV5 objects.
      */
     Page<YoloV5> getAllYoloV5(int page, int size);
@@ -32,5 +33,10 @@ public interface YoloV5Service {
      */
     YoloV5 getYoloV5ByName(String name);
 
+    /**
+     * Regresa todos los objetos YoloV5.
+     * 
+     * @return A list of all YoloV5 objects.
+     */
     List<YoloV5> getAllYoloV5List();
 }

@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 @Entity
 @Document(collection = "labels")
+/**Clase que representa a una etiqueta  */
 public class Labels {
     @Id
     private int id;

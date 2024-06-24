@@ -84,9 +84,32 @@ public interface ImageServices {
      */
     Map<String, Object> uploadImage(List<MultipartFile> file, String path);
 
+    /**
+     * Obtiene todas las imágenes almacenadas en la base de datos.
+     * 
+     * @return Una lista de todas las imágenes.
+     */
     List<Image> getAllImages();
-
+    /**
+     * Obtiene una imagen por su fecha de creacion.
+     * 
+     * @param startDate La fecha de inicio.
+     * @param endDate La fecha de fin.
+     * @return Un objeto Optional que contiene la imagen, si existe.
+     */
     List<Image> getImageByCreatedDate(Date startDate, Date endDate);
+    /**
+     * Obtiene una imagen por su fecha de actualizacion.
+     * 
+     * @param startDate La fecha de inicio.
+     * @param endDate La fecha de fin.
+     * @return Un objeto Optional que contiene la imagen, si existe.
+     */
     List<Image> getImageByUpdatedDate(Date startDate, Date endDate);
+    /**
+     * Obtiene la ultima imagen almacenada en la base de datos.
+     * 
+     * @return Un objeto Optional que contiene la imagen, si existe.
+     */
     Optional<Image> getLastId();
 }
