@@ -3,7 +3,7 @@
 Este proyecto es un backend desarrollado con Spring Boot, diseñado para facilitar la gestión de datos de etiquetado de imágenes y su conversión al formato YOLOv5.
 
 ## Requisitos Previos
-https://badgen.net/badge/17/java/orange?icon=java
+![Static Badge](https://badgen.net/badge/17/java/orange?icon=java)
 Para ejecutar y desarrollar este backend, necesitarás:
 
 - Jdk 17 o superior
