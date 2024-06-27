@@ -16,9 +16,11 @@ Para ejecutar y desarrollar este backend, necesitarás:
 
 Sigue estos pasos para configurar el proyecto en tu entorno local:
 
-1. Clona el repositorio a tu máquina local usando `git clone https://github.com/andrew001s/labelapp`.
-2. Abre el proyecto en tu IDE preferido.
-3. Asegúrate de que el IDE reconozca el archivo `pom.xml` para gestionar las dependencias.
+1. Clona el repositorio a tu máquina local usando
+   ```bash
+   git clone https://github.com/andrew001s/labelapp
+3. Abre el proyecto en tu IDE preferido.
+4. Asegúrate de que el IDE reconozca el archivo `pom.xml` para gestionar las dependencias.
 
 
 ## Uso del Backend
