@@ -4,7 +4,7 @@ Este proyecto es un backend desarrollado con Spring Boot, diseñado para facilit
 
 ## Requisitos Previos
 ![Static Badge](https://badgen.net/badge/17/java/orange?icon=java)
-
+[![Static Badge](https://badgen.net/badge/17/java/orange?icon=java)](https://img.shields.io/badge/SpringBoot-3.3.0-version)
 Para ejecutar y desarrollar este backend, necesitarás:
 
 - Jdk 17 o superior
