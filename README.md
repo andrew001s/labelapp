@@ -22,6 +22,21 @@ Sigue estos pasos para configurar el proyecto en tu entorno local:
 3. Abre el proyecto en tu IDE preferido.
 4. Asegúrate de que el IDE reconozca el archivo `pom.xml` para gestionar las dependencias.
 
+# Configuración Proyecto
+En src/resources/application.propierties
+```java
+spring.application.name=labelapp
+spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+spring.data.mongodb.uri=mongodb+srv://YourDatabaseUri/
+spring.data.mongodb.database=YourDabaseName
+file.upload-dir=YourUploadDirectory
+```
+Ajusta los valores para
+<ul>
+   <li><strong>spring.data.mongodb.uri: </strong>El Uri de tu base de datos Mongo</li>
+   <li><strong>spring.data.mongodb.database: </strong>El Nombre de tu base de datos</li>
+   <li><strong>file.upload-dir: </strong>El url o directorio de tu cdn</li>
+</ul>
 
 ## Uso del Backend
 
